@@ -1,0 +1,80 @@
+2025-05-05 18:15:20,654 - contexto_solver_app - INFO - Starting setup process for dataset: glove.6B.100d
+2025-05-05 18:15:20,654 - contexto_solver_app - INFO - Dataset details: URL=https://nlp.stanford.edu/data/glove.6B.zip, Filename=glove.6B.100d.txt, Vector Size=100
+2025-05-05 18:15:20,654 - contexto_solver_app - INFO - Downloading https://nlp.stanford.edu/data/glove.6B.zip to .data/glove.6B.zip...
+2025-05-05 18:19:26,343 - contexto_solver_app - INFO - Starting setup process for dataset: glove.6B.100d
+2025-05-05 18:19:26,343 - contexto_solver_app - INFO - Dataset details: URL=https://nlp.stanford.edu/data/glove.6B.zip, Filename=glove.6B.100d.txt, Vector Size=100
+2025-05-05 18:19:26,343 - contexto_solver_app - INFO - Zip file .data/glove.6B.zip already exists. Skipping download.
+2025-05-05 18:19:26,343 - contexto_solver_app - INFO - Extracting glove.6B.100d.txt from .data/glove.6B.zip...
+2025-05-05 18:19:26,343 - contexto_solver_app - ERROR - Error extracting .data/glove.6B.zip: File is not a zip file
+2025-05-05 18:19:26,343 - contexto_solver_app - ERROR - Failed to obtain embeddings file. Exiting.
+2025-05-05 18:19:54,428 - contexto_solver_app - INFO - Starting setup process for dataset: glove.6B.100d
+2025-05-05 18:19:54,428 - contexto_solver_app - INFO - Dataset details: URL=https://nlp.stanford.edu/data/glove.6B.zip, Filename=glove.6B.100d.txt, Vector Size=100
+2025-05-05 18:19:54,428 - contexto_solver_app - INFO - Downloading https://nlp.stanford.edu/data/glove.6B.zip to .data/glove.6B.zip...
+2025-05-05 18:20:40,105 - contexto_solver_app - INFO - Starting setup process for dataset: glove.6B.100d
+2025-05-05 18:20:40,106 - contexto_solver_app - INFO - Dataset details: URL=https://nlp.stanford.edu/data/glove.6B.zip, Filename=glove.6B.100d.txt, Vector Size=100
+2025-05-05 18:20:40,106 - contexto_solver_app - INFO - Downloading https://nlp.stanford.edu/data/glove.6B.zip to .data/glove.6B.zip...
+2025-05-05 18:23:45,268 - contexto_solver_app - INFO - Starting setup process for dataset: glove.6B.100d
+2025-05-05 18:23:45,268 - contexto_solver_app - INFO - Dataset details: URL=https://nlp.stanford.edu/data/glove.6B.zip, Filename=glove.6B.100d.txt, Vector Size=100
+2025-05-05 18:23:45,268 - contexto_solver_app - INFO - Downloading https://nlp.stanford.edu/data/glove.6B.zip to .data/glove.6B.zip...
+2025-05-05 18:24:58,924 - contexto_solver_app - INFO - Starting setup process for dataset: glove.6B.100d
+2025-05-05 18:24:58,924 - contexto_solver_app - INFO - Dataset details: URL=https://nlp.stanford.edu/data/glove.6B.zip, Filename=glove.6B.100d.txt, Vector Size=100
+2025-05-05 18:24:58,924 - contexto_solver_app - INFO - Downloading https://nlp.stanford.edu/data/glove.6B.zip to .data/glove.6B.zip...
+2025-05-05 18:27:35,262 - contexto_solver_app - INFO - Starting setup process for dataset: glove.6B.100d
+2025-05-05 18:27:35,262 - contexto_solver_app - INFO - Dataset details: URL=https://nlp.stanford.edu/data/glove.6B.zip, Filename=glove.6B.100d.txt, Vector Size=100
+2025-05-05 18:27:35,262 - contexto_solver_app - INFO - Downloading https://nlp.stanford.edu/data/glove.6B.zip to .data/glove.6B.zip...
+2025-05-05 18:34:06,952 - contexto_solver_app - INFO - Starting setup process for dataset: glove.6B.100d
+2025-05-05 18:34:06,952 - contexto_solver_app - INFO - Dataset details: URL=https://huggingface.co/stanfordnlp/glove/resolve/main/glove.6B.zip, Filename=glove.6B.100d.txt, Vector Size=100
+2025-05-05 18:34:06,952 - contexto_solver_app - INFO - Downloading https://huggingface.co/stanfordnlp/glove/resolve/main/glove.6B.zip to .data/glove.6B.zip...
+2025-05-05 18:36:19,234 - contexto_solver_app - INFO - Download complete.
+2025-05-05 18:36:19,234 - contexto_solver_app - INFO - Extracting glove.6B.100d.txt from .data/glove.6B.zip...
+2025-05-05 18:36:19,787 - contexto_solver_app - INFO - Extraction complete: .data/glove.6B.100d.txt
+2025-05-05 18:36:19,787 - contexto_solver_app - INFO - Connecting to Qdrant at localhost:6333...
+2025-05-05 18:36:19,910 - contexto_solver_app - ERROR - Failed to connect to Qdrant: 'QdrantClient' object has no attribute 'health_check'
+2025-05-05 18:39:21,503 - contexto_solver_app - INFO - Starting setup process for dataset: glove.6B.100d
+2025-05-05 18:39:21,503 - contexto_solver_app - INFO - Dataset details: URL=https://huggingface.co/stanfordnlp/glove/resolve/main/glove.6B.zip, Filename=glove.6B.100d.txt, Vector Size=100
+2025-05-05 18:39:21,503 - contexto_solver_app - INFO - Embeddings file .data/glove.6B.100d.txt already exists. Skipping download and extraction.
+2025-05-05 18:39:21,503 - contexto_solver_app - INFO - Connecting to Qdrant at localhost:6333...
+2025-05-05 18:39:21,544 - contexto_solver_app - INFO - Successfully connected to Qdrant.
+2025-05-05 18:39:21,565 - contexto_solver_app - WARNING - Collection 'glove.6B.100d' not found or error checking: <_InactiveRpcError of RPC that terminated with:
+	status = StatusCode.UNAVAILABLE
+	details = "failed to connect to all addresses; last error: UNKNOWN: ipv4:127.0.0.1:6334: Ssl handshake failed (TSI_PROTOCOL_FAILURE): SSL_ERROR_SSL: error:100000f7:SSL routines:OPENSSL_internal:WRONG_VERSION_NUMBER: Invalid certificate verification context"
+	debug_error_string = "UNKNOWN:Error received from peer  {created_time:"2025-05-05T18:39:21.565268+02:00", grpc_status:14, grpc_message:"failed to connect to all addresses; last error: UNKNOWN: ipv4:127.0.0.1:6334: Ssl handshake failed (TSI_PROTOCOL_FAILURE): SSL_ERROR_SSL: error:100000f7:SSL routines:OPENSSL_internal:WRONG_VERSION_NUMBER: Invalid certificate verification context"}"
+>. Attempting to create.
+2025-05-05 18:39:21,565 - contexto_solver_app - ERROR - Failed to create collection 'glove.6B.100d': <_InactiveRpcError of RPC that terminated with:
+	status = StatusCode.UNAVAILABLE
+	details = "failed to connect to all addresses; last error: UNKNOWN: ipv4:127.0.0.1:6334: Ssl handshake failed (TSI_PROTOCOL_FAILURE): SSL_ERROR_SSL: error:100000f7:SSL routines:OPENSSL_internal:WRONG_VERSION_NUMBER: Invalid certificate verification context"
+	debug_error_string = "UNKNOWN:Error received from peer  {created_time:"2025-05-05T18:39:21.565527+02:00", grpc_status:14, grpc_message:"failed to connect to all addresses; last error: UNKNOWN: ipv4:127.0.0.1:6334: Ssl handshake failed (TSI_PROTOCOL_FAILURE): SSL_ERROR_SSL: error:100000f7:SSL routines:OPENSSL_internal:WRONG_VERSION_NUMBER: Invalid certificate verification context"}"
+>
+2025-05-05 18:39:21,565 - contexto_solver_app - ERROR - Failed during collection setup for 'glove.6B.100d'. Exiting. Error: <_InactiveRpcError of RPC that terminated with:
+	status = StatusCode.UNAVAILABLE
+	details = "failed to connect to all addresses; last error: UNKNOWN: ipv4:127.0.0.1:6334: Ssl handshake failed (TSI_PROTOCOL_FAILURE): SSL_ERROR_SSL: error:100000f7:SSL routines:OPENSSL_internal:WRONG_VERSION_NUMBER: Invalid certificate verification context"
+	debug_error_string = "UNKNOWN:Error received from peer  {created_time:"2025-05-05T18:39:21.565527+02:00", grpc_status:14, grpc_message:"failed to connect to all addresses; last error: UNKNOWN: ipv4:127.0.0.1:6334: Ssl handshake failed (TSI_PROTOCOL_FAILURE): SSL_ERROR_SSL: error:100000f7:SSL routines:OPENSSL_internal:WRONG_VERSION_NUMBER: Invalid certificate verification context"}"
+>
+2025-05-05 18:42:35,389 - contexto_solver_app - INFO - Starting setup process for dataset: glove.6B.100d
+2025-05-05 18:42:35,389 - contexto_solver_app - INFO - Dataset details: URL=https://huggingface.co/stanfordnlp/glove/resolve/main/glove.6B.zip, Filename=glove.6B.100d.txt, Vector Size=100
+2025-05-05 18:42:35,389 - contexto_solver_app - INFO - Embeddings file .data/glove.6B.100d.txt already exists. Skipping download and extraction.
+2025-05-05 18:42:35,389 - contexto_solver_app - INFO - Connecting to Qdrant at localhost:6333...
+2025-05-05 18:42:35,391 - contexto_solver_app - ERROR - Failed to connect to Qdrant: Client.__init__() got an unexpected keyword argument 'http_port'
+2025-05-05 18:43:18,382 - contexto_solver_app - INFO - Starting setup process for dataset: glove.6B.100d
+2025-05-05 18:43:18,382 - contexto_solver_app - INFO - Dataset details: URL=https://huggingface.co/stanfordnlp/glove/resolve/main/glove.6B.zip, Filename=glove.6B.100d.txt, Vector Size=100
+2025-05-05 18:43:18,382 - contexto_solver_app - INFO - Embeddings file .data/glove.6B.100d.txt already exists. Skipping download and extraction.
+2025-05-05 18:43:18,382 - contexto_solver_app - INFO - Connecting to Qdrant at localhost:6333...
+2025-05-05 18:43:18,425 - contexto_solver_app - INFO - Successfully connected to Qdrant.
+2025-05-05 18:43:18,432 - contexto_solver_app - WARNING - Collection 'glove.6B.100d' not found or error checking: <_InactiveRpcError of RPC that terminated with:
+	status = StatusCode.NOT_FOUND
+	details = "Not found: Collection `glove.6B.100d` doesn't exist!"
+	debug_error_string = "UNKNOWN:Error received from peer  {grpc_message:"Not found: Collection `glove.6B.100d` doesn\'t exist!", grpc_status:5, created_time:"2025-05-05T18:43:18.431529+02:00"}"
+>. Attempting to create.
+2025-05-05 18:43:18,560 - contexto_solver_app - INFO - Collection 'glove.6B.100d' created successfully.
+2025-05-05 18:43:18,560 - contexto_solver_app - INFO - Starting upsert process for .data/glove.6B.100d.txt into 'glove.6B.100d'...
+2025-05-05 18:43:41,986 - contexto_solver_app - INFO - Finished upserting 400001 embeddings into 'glove.6B.100d'. Skipped 0 lines.
+2025-05-05 18:43:41,986 - contexto_solver_app - INFO - Qdrant setup script finished.
+2025-05-05 18:45:58,132 - contexto_solver_app - INFO - Starting setup process for dataset: glove.6B.100d
+2025-05-05 18:45:58,132 - contexto_solver_app - INFO - Dataset details: URL=https://huggingface.co/stanfordnlp/glove/resolve/main/glove.6B.zip, Filename=glove.6B.100d.txt, Vector Size=100
+2025-05-05 18:45:58,132 - contexto_solver_app - INFO - Embeddings file .data/glove.6B.100d.txt already exists. Skipping download and extraction.
+2025-05-05 18:45:58,132 - contexto_solver_app - INFO - Connecting to Qdrant at localhost:6333...
+2025-05-05 18:45:58,178 - contexto_solver_app - INFO - Successfully connected to Qdrant.
+2025-05-05 18:45:58,185 - contexto_solver_app - INFO - Collection 'glove.6B.100d' already exists.
+2025-05-05 18:45:58,185 - contexto_solver_app - INFO - Starting upsert process for .data/glove.6B.100d.txt into 'glove.6B.100d'...
+2025-05-05 18:46:21,079 - contexto_solver_app - INFO - Finished upserting 400001 embeddings into 'glove.6B.100d'. Skipped 0 lines.
+2025-05-05 18:46:21,079 - contexto_solver_app - INFO - Qdrant setup script finished.
