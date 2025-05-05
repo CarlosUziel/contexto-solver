@@ -1,0 +1,16 @@
+services:
+  qdrant:
+    image: qdrant/qdrant:latest
+    container_name: qdrant_db
+    ports:
+      # Map host port to container port using variables from .env
+      - "${QDRANT_GRPC_HOST_PORT:-6333}:${QDRANT_GRPC_CONTAINER_PORT:-6333}"  # gRPC port
+      - "${QDRANT_HTTP_HOST_PORT:-6334}:${QDRANT_HTTP_CONTAINER_PORT:-6334}"  # REST API port
+    volumes:
+      - ./qdrant_storage:/qdrant/storage:z
+    environment:
+      # Tell Qdrant service which ports to listen on *inside* the container
+      QDRANT__SERVICE__GRPC_PORT: ${QDRANT_GRPC_CONTAINER_PORT:-6333}
+      QDRANT__SERVICE__HTTP_PORT: ${QDRANT_HTTP_CONTAINER_PORT:-6334}
+      QDRANT__SERVICE__API_KEY: ${QDRANT_API_KEY:-} # Optional API key
+      QDRANT__LOG_LEVEL: ${QDRANT_LOG_LEVEL:-info} # Set log level (error, warn, info, debug, trace)

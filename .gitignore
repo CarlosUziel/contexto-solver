@@ -1,0 +1,9 @@
+data/
+.env
+# Qdrant storage
+qdrant_storage/
+# Data directory for downloads
+.data/
+# Python cache
+__pycache__/
+*.py[co]
