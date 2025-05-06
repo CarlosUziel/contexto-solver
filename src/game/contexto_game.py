@@ -1,5 +1,6 @@
 from typing import Dict, List, Optional, Tuple
 
+import numpy as np
 from qdrant_client import QdrantClient
 
 from config.logger import app_logger as logger
@@ -7,7 +8,6 @@ from config.settings import settings
 from db.utils import (
     get_all_similarities,
     get_collection_info,
-    get_qdrant_client,
     get_random_point,
 )
 
@@ -15,10 +15,11 @@ from db.utils import (
 class ContextoGame:
     """Manages the state and logic of a Contexto game instance."""
 
-    def __init__(self, collection_name: Optional[str] = None):
+    def __init__(self, client: QdrantClient, collection_name: Optional[str] = None):
         """Initializes the Contexto game.
 
         Args:
+            client (QdrantClient): An initialized QdrantClient instance.
             collection_name (Optional[str]): The name of the Qdrant collection to use.
                 Defaults to the value in settings.glove_dataset.
 
@@ -33,10 +34,7 @@ class ContextoGame:
             f"Initializing Contexto Game with collection: {self.collection_name}"
         )
 
-        self.client: Optional[QdrantClient] = get_qdrant_client()
-        if not self.client:
-            logger.error("Qdrant client initialization failed.")
-            raise ConnectionError("Failed to connect to Qdrant.")
+        self.client: QdrantClient = client
 
         collection_info = get_collection_info(self.client, self.collection_name)
         if not collection_info or not collection_info.points_count:
@@ -60,13 +58,13 @@ class ContextoGame:
             raise ValueError("Could not select a valid target word for the game.")
 
         self.target_word: str = target_point.payload["word"]
-        self.target_vector: List[float] = target_point.vector
+        self.target_vector: np.ndarray = np.array(target_point.vector, dtype=np.float32)
         logger.info(
             f"Target word selected: '{self.target_word}' (ID: {target_point.id})"
         )
 
         # Compute all similarities
-        self.word_to_rank_and_vector: Optional[Dict[str, Tuple[int, List[float]]]] = (
+        self.word_to_rank_and_vector: Optional[Dict[str, Tuple[int, np.ndarray]]] = (
             get_all_similarities(
                 self.client,
                 self.collection_name,
@@ -81,21 +79,21 @@ class ContextoGame:
             )
 
         self.guesses: List[
-            Tuple[str, int, List[float]]
+            Tuple[str, int, np.ndarray]
         ] = []  # Store word, rank, and vector
         logger.info(
             f"Contexto Game initialized successfully for target '{self.target_word}'. "
             f"{len(self.word_to_rank_and_vector)} word similarities ranked."
         )
 
-    def get_word_rank_and_vector(self, word: str) -> Optional[Tuple[int, List[float]]]:
+    def get_word_rank_and_vector(self, word: str) -> Optional[Tuple[int, np.ndarray]]:
         """Gets the similarity rank and vector of a given word (case-insensitive).
 
         Args:
             word (str): The word to check.
 
         Returns:
-            Optional[Tuple[int, List[float]]]: A tuple (rank, vector), or None if
+            Optional[Tuple[int, np.ndarray]]: A tuple (rank, vector), or None if
                                                the word is not found.
         """
         if not self.word_to_rank_and_vector:
@@ -134,13 +132,13 @@ class ContextoGame:
             )
             return None
 
-    def get_guesses(self) -> List[Tuple[str, int, List[float]]]:
+    def get_guesses(self) -> List[Tuple[str, int, np.ndarray]]:
         """Returns the list of guesses made so far, sorted by rank.
 
         Each guess is a tuple of (word, rank, vector), where word is lowercase.
 
         Returns:
-            List[Tuple[str, int, List[float]]]: A list of tuples (word, rank, vector).
+            List[Tuple[str, int, np.ndarray]]: A list of tuples (word, rank, vector).
         """
         return self.guesses
 

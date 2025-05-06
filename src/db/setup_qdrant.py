@@ -7,6 +7,7 @@ from typing import Optional, Tuple
 
 import grpc
 import nltk
+import numpy as np  # Added numpy import
 import requests
 import typer
 from qdrant_client import QdrantClient, models
@@ -32,11 +33,18 @@ from config.settings import Settings, settings
 
 # --- Constants ---
 DATA_DIR = Path(".data")
+WORDS_FILE = DATA_DIR.parent / "words.txt"  # Path to words.txt at the project root
 GLOVE_URLS = {
-    "glove.6B": "https://huggingface.co/stanfordnlp/glove/resolve/main/glove.6B.zip",
-    "glove.twitter.27B": "https://huggingface.co/stanfordnlp/glove/resolve/main/glove.twitter.27B.zip",
-    "glove.42B.300d": "https://huggingface.co/stanfordnlp/glove/resolve/main/glove.42B.300d.zip",
-    "glove.840B.300d": "https://huggingface.co/stanfordnlp/glove/resolve/main/glove.840B.300d.zip",
+    "glove.6B": ("https://huggingface.co/stanfordnlp/glove/resolve/main/glove.6B.zip"),
+    "glove.twitter.27B": (
+        "https://huggingface.co/stanfordnlp/glove/resolve/main/glove.twitter.27B.zip"
+    ),
+    "glove.42B.300d": (
+        "https://huggingface.co/stanfordnlp/glove/resolve/main/glove.42B.300d.zip"
+    ),
+    "glove.840B.300d": (
+        "https://huggingface.co/stanfordnlp/glove/resolve/main/glove.840B.300d.zip"
+    ),
 }
 
 DIMENSIONS = {
@@ -171,7 +179,8 @@ def download_and_extract_glove(
                     )
                 actual_filename_in_zip = txt_files[0]
                 logger.warning(
-                    f"{filename} not found directly. Extracting {actual_filename_in_zip} instead."
+                    f"{filename} not found directly. Extracting "
+                    f"{actual_filename_in_zip} instead."
                 )
                 # 5b. Extract and rename the file
                 zip_ref.extract(actual_filename_in_zip, path=extract_to)
@@ -238,7 +247,8 @@ def setup_qdrant_collection(
         else:
             # Log as warning for other unexpected errors during the check
             logger.warning(
-                f"Warning during collection check for '{collection_name}': {e}. Attempting to create anyway."
+                f"Warning during collection check for '{collection_name}': {e}. "
+                f"Attempting to create anyway."
             )
 
         # 3. Attempt to create the collection
@@ -256,7 +266,10 @@ def setup_qdrant_collection(
 
 
 def upsert_embeddings(
-    client: QdrantClient, collection_name: str, embeddings_file: Path
+    client: QdrantClient,
+    collection_name: str,
+    embeddings_file: Path,
+    allowed_words: Optional[set[str]] = None,
 ) -> None:
     """Loads word embeddings from a file and upserts them into a Qdrant collection.
 
@@ -269,6 +282,9 @@ def upsert_embeddings(
         collection_name (str): The name of the collection to upsert into.
         embeddings_file (Path): The Path object of the GloVe embeddings file
             (.txt format).
+        allowed_words (Optional[set[str]]): A set of lowercase words to filter against.
+                                            Only words in this set will be upserted.
+                                            If None, no filtering by this set is done.
 
     Returns:
         None.
@@ -311,37 +327,69 @@ def upsert_embeddings(
                     values = line.strip().split()
                     if len(values) < 2:
                         logger.warning(
-                            f"Skipping malformed line {global_line_index + 1}: {line[:50]}..."
+                            f"Skipping malformed line {global_line_index + 1}: "
+                            f"{line[:50]}..."
                         )
                         skipped_lines += 1
                         global_line_index += 1
                         continue
 
-                    word_from_file = values[0]
+                    word_from_file = values[0].lower()  # Ensure word is lowercase
                     try:
-                        # Check if the word is a valid English word
-                        if not wordnet.synsets(word_from_file):
+                        # Filter by allowed_words set if provided
+                        if allowed_words and word_from_file not in allowed_words:
                             logger.debug(
-                                f"Skipping non-English word {global_line_index + 1}: {word_from_file}"
+                                f"Skipping word '{word_from_file}' (line {global_line_index + 1}) "
+                                f"as it is not in the provided allowed_words set."
                             )
                             skipped_lines += 1
                             global_line_index += 1
                             continue
 
-                        vector = [float(val) for val in values[1:]]
+                        # Check if the word is a valid English word
+                        if not wordnet.synsets(
+                            word_from_file
+                        ):  # word_from_file is already lowercase
+                            logger.debug(
+                                f"Skipping non-English word {global_line_index + 1}: "
+                                f"{word_from_file}"
+                            )
+                            skipped_lines += 1
+                            global_line_index += 1
+                            continue
+
+                        vector_list = [float(val) for val in values[1:]]
+                        # Normalize the vector
+                        np_vector = np.array(vector_list, dtype=np.float32)
+                        norm = np.linalg.norm(np_vector)
+                        if norm > 0:
+                            normalized_vector = (np_vector / norm).tolist()
+                        else:
+                            logger.warning(
+                                f"Skipping word '{word_from_file}' (line {global_line_index + 1}) "
+                                f"due to zero vector (cannot normalize)."
+                            )
+                            skipped_lines += 1
+                            global_line_index += 1
+                            continue
+
+                        # UUID will be based on the lowercase word
                         point_id = str(
                             uuid.uuid5(settings.qdrant_uuid_namespace, word_from_file)
                         )
                         points_to_upsert.append(
                             models.PointStruct(
                                 id=point_id,
-                                vector=vector,
-                                payload={"word": word_from_file},
+                                vector=normalized_vector,  # Use normalized vector
+                                payload={
+                                    "word": word_from_file
+                                },  # Store lowercase word
                             )
                         )
                     except ValueError:
                         logger.warning(
-                            f"Skipping line {global_line_index + 1} due to non-float vector value: {line[:50]}..."
+                            f"Skipping line {global_line_index + 1} due to non-float "
+                            f"vector value: {line[:50]}..."
                         )
                         skipped_lines += 1
 
@@ -362,7 +410,8 @@ def upsert_embeddings(
                         total_upserted_count += len(points_to_upsert)
                     except Exception as upsert_err:
                         logger.error(
-                            f"Error during batch upsert near line {global_line_index}: {upsert_err}"
+                            f"Error during batch upsert near line {global_line_index}: "
+                            f"{upsert_err}"
                         )
 
                 # 3e. Update the progress bar (advance still works)
@@ -401,6 +450,26 @@ def main(
     # 1. Log the dataset being used (obtained from typer option)
     logger.info(f"Starting setup process for dataset: {dataset_name}")
 
+    # 1a. Load allowed words from words.txt
+    allowed_words_set: Optional[set[str]] = None
+    if WORDS_FILE.exists():
+        try:
+            with WORDS_FILE.open("r", encoding="utf-8") as wf:
+                allowed_words_set = {
+                    line.strip().lower() for line in wf if line.strip()
+                }
+            logger.info(
+                f"Successfully loaded {len(allowed_words_set)} words from {WORDS_FILE}"
+            )
+        except Exception as e:
+            logger.error(
+                f"Error reading {WORDS_FILE}: {e}. Proceeding without word filtering."
+            )
+            allowed_words_set = None
+    else:
+        logger.warning(f"{WORDS_FILE} not found. Proceeding without word filtering.")
+        allowed_words_set = None
+
     # 2. Get dataset details (URL, filename, vector size)
     try:
         if (
@@ -427,7 +496,8 @@ def main(
 
     # 4. Connect to Qdrant
     logger.info(
-        f"Connecting to Qdrant at {settings.qdrant_host}:{settings.qdrant_grpc_host_port}..."
+        f"Connecting to Qdrant at {settings.qdrant_host}:"
+        f"{settings.qdrant_grpc_host_port}..."
     )
     try:
         client = QdrantClient(
@@ -449,12 +519,13 @@ def main(
         setup_qdrant_collection(client, collection_name, vector_size)
     except Exception as e:
         logger.error(
-            f"Failed during collection setup for '{collection_name}'. Exiting. Error: {e}"
+            f"Failed during collection setup for '{collection_name}'. Exiting. "
+            f"Error: {e}"
         )
         raise typer.Exit(code=1)
 
     # 6. Upsert embeddings
-    upsert_embeddings(client, collection_name, embeddings_file_path)
+    upsert_embeddings(client, collection_name, embeddings_file_path, allowed_words_set)
 
     # 7. Log completion
     logger.info("Qdrant setup script finished.")
