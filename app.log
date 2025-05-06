@@ -78,3 +78,788 @@
 2025-05-05 18:45:58,185 - contexto_solver_app - INFO - Starting upsert process for .data/glove.6B.100d.txt into 'glove.6B.100d'...
 2025-05-05 18:46:21,079 - contexto_solver_app - INFO - Finished upserting 400001 embeddings into 'glove.6B.100d'. Skipped 0 lines.
 2025-05-05 18:46:21,079 - contexto_solver_app - INFO - Qdrant setup script finished.
+2025-05-06 09:10:00,740 - contexto_solver_app - INFO - Starting setup process for dataset: glove.6B.100d
+2025-05-06 09:10:00,740 - contexto_solver_app - INFO - Dataset details: URL=https://huggingface.co/stanfordnlp/glove/resolve/main/glove.6B.zip, Filename=glove.6B.100d.txt, Vector Size=100
+2025-05-06 09:10:00,740 - contexto_solver_app - INFO - Embeddings file .data/glove.6B.100d.txt already exists. Skipping download and extraction.
+2025-05-06 09:10:00,740 - contexto_solver_app - INFO - Connecting to Qdrant at localhost:6333...
+2025-05-06 09:10:00,785 - contexto_solver_app - INFO - Successfully connected to Qdrant.
+2025-05-06 09:10:00,791 - contexto_solver_app - INFO - Collection 'glove.6B.100d' already exists.
+2025-05-06 09:10:00,791 - contexto_solver_app - INFO - Starting upsert process for .data/glove.6B.100d.txt into 'glove.6B.100d'...
+2025-05-06 09:10:00,992 - contexto_solver_app - ERROR - Error during batch upsert near line 4096: <_InactiveRpcError of RPC that terminated with:
+	status = StatusCode.INVALID_ARGUMENT
+	details = "Unable to parse UUID: the"
+	debug_error_string = "UNKNOWN:Error received from peer ipv6:%5B::1%5D:6333 {created_time:"2025-05-06T09:10:00.991924+02:00", grpc_status:3, grpc_message:"Unable to parse UUID: the"}"
+>
+2025-05-06 09:10:01,190 - contexto_solver_app - ERROR - Error during batch upsert near line 8192: <_InactiveRpcError of RPC that terminated with:
+	status = StatusCode.INVALID_ARGUMENT
+	details = "Unable to parse UUID: traveled"
+	debug_error_string = "UNKNOWN:Error received from peer ipv6:%5B::1%5D:6333 {created_time:"2025-05-06T09:10:01.190416+02:00", grpc_status:3, grpc_message:"Unable to parse UUID: traveled"}"
+>
+2025-05-06 09:10:01,381 - contexto_solver_app - ERROR - Error during batch upsert near line 12288: <_InactiveRpcError of RPC that terminated with:
+	status = StatusCode.INVALID_ARGUMENT
+	details = "Unable to parse UUID: maurice"
+	debug_error_string = "UNKNOWN:Error received from peer ipv6:%5B::1%5D:6333 {grpc_message:"Unable to parse UUID: maurice", grpc_status:3, created_time:"2025-05-06T09:10:01.381099+02:00"}"
+>
+2025-05-06 09:10:01,579 - contexto_solver_app - ERROR - Error during batch upsert near line 16384: <_InactiveRpcError of RPC that terminated with:
+	status = StatusCode.INVALID_ARGUMENT
+	details = "Unable to parse UUID: massacres"
+	debug_error_string = "UNKNOWN:Error received from peer ipv6:%5B::1%5D:6333 {grpc_message:"Unable to parse UUID: massacres", grpc_status:3, created_time:"2025-05-06T09:10:01.579238+02:00"}"
+>
+2025-05-06 09:10:01,788 - contexto_solver_app - ERROR - Error during batch upsert near line 20480: <_InactiveRpcError of RPC that terminated with:
+	status = StatusCode.INVALID_ARGUMENT
+	details = "Unable to parse UUID: eur"
+	debug_error_string = "UNKNOWN:Error received from peer ipv6:%5B::1%5D:6333 {grpc_message:"Unable to parse UUID: eur", grpc_status:3, created_time:"2025-05-06T09:10:01.78842+02:00"}"
+>
+2025-05-06 09:10:01,983 - contexto_solver_app - ERROR - Error during batch upsert near line 24576: <_InactiveRpcError of RPC that terminated with:
+	status = StatusCode.INVALID_ARGUMENT
+	details = "Unable to parse UUID: 193"
+	debug_error_string = "UNKNOWN:Error received from peer ipv6:%5B::1%5D:6333 {created_time:"2025-05-06T09:10:01.983104+02:00", grpc_status:3, grpc_message:"Unable to parse UUID: 193"}"
+>
+2025-05-06 09:10:02,177 - contexto_solver_app - ERROR - Error during batch upsert near line 28672: <_InactiveRpcError of RPC that terminated with:
+	status = StatusCode.INVALID_ARGUMENT
+	details = "Unable to parse UUID: walden"
+	debug_error_string = "UNKNOWN:Error received from peer ipv6:%5B::1%5D:6333 {grpc_message:"Unable to parse UUID: walden", grpc_status:3, created_time:"2025-05-06T09:10:02.177458+02:00"}"
+>
+2025-05-06 09:10:02,369 - contexto_solver_app - ERROR - Error during batch upsert near line 32768: <_InactiveRpcError of RPC that terminated with:
+	status = StatusCode.INVALID_ARGUMENT
+	details = "Unable to parse UUID: conrail"
+	debug_error_string = "UNKNOWN:Error received from peer ipv6:%5B::1%5D:6333 {created_time:"2025-05-06T09:10:02.369552+02:00", grpc_status:3, grpc_message:"Unable to parse UUID: conrail"}"
+>
+2025-05-06 09:10:02,576 - contexto_solver_app - ERROR - Error during batch upsert near line 36864: <_InactiveRpcError of RPC that terminated with:
+	status = StatusCode.INVALID_ARGUMENT
+	details = "Unable to parse UUID: 332"
+	debug_error_string = "UNKNOWN:Error received from peer ipv6:%5B::1%5D:6333 {grpc_message:"Unable to parse UUID: 332", grpc_status:3, created_time:"2025-05-06T09:10:02.57604+02:00"}"
+>
+2025-05-06 09:10:02,773 - contexto_solver_app - ERROR - Error during batch upsert near line 40960: <_InactiveRpcError of RPC that terminated with:
+	status = StatusCode.INVALID_ARGUMENT
+	details = "Unable to parse UUID: a-side"
+	debug_error_string = "UNKNOWN:Error received from peer ipv6:%5B::1%5D:6333 {grpc_message:"Unable to parse UUID: a-side", grpc_status:3, created_time:"2025-05-06T09:10:02.773354+02:00"}"
+>
+2025-05-06 09:10:02,970 - contexto_solver_app - ERROR - Error during batch upsert near line 45056: <_InactiveRpcError of RPC that terminated with:
+	status = StatusCode.INVALID_ARGUMENT
+	details = "Unable to parse UUID: fracas"
+	debug_error_string = "UNKNOWN:Error received from peer ipv6:%5B::1%5D:6333 {created_time:"2025-05-06T09:10:02.970176+02:00", grpc_status:3, grpc_message:"Unable to parse UUID: fracas"}"
+>
+2025-05-06 09:10:03,162 - contexto_solver_app - ERROR - Error during batch upsert near line 49152: <_InactiveRpcError of RPC that terminated with:
+	status = StatusCode.INVALID_ARGUMENT
+	details = "Unable to parse UUID: 1535"
+	debug_error_string = "UNKNOWN:Error received from peer ipv6:%5B::1%5D:6333 {grpc_message:"Unable to parse UUID: 1535", grpc_status:3, created_time:"2025-05-06T09:10:03.162593+02:00"}"
+>
+2025-05-06 09:10:03,373 - contexto_solver_app - ERROR - Error during batch upsert near line 53248: <_InactiveRpcError of RPC that terminated with:
+	status = StatusCode.INVALID_ARGUMENT
+	details = "Unable to parse UUID: ifa"
+	debug_error_string = "UNKNOWN:Error received from peer ipv6:%5B::1%5D:6333 {grpc_message:"Unable to parse UUID: ifa", grpc_status:3, created_time:"2025-05-06T09:10:03.372845+02:00"}"
+>
+2025-05-06 09:10:03,572 - contexto_solver_app - ERROR - Error during batch upsert near line 57344: <_InactiveRpcError of RPC that terminated with:
+	status = StatusCode.INVALID_ARGUMENT
+	details = "Unable to parse UUID: virginians"
+	debug_error_string = "UNKNOWN:Error received from peer ipv6:%5B::1%5D:6333 {grpc_message:"Unable to parse UUID: virginians", grpc_status:3, created_time:"2025-05-06T09:10:03.572009+02:00"}"
+>
+2025-05-06 09:10:03,770 - contexto_solver_app - ERROR - Error during batch upsert near line 61440: <_InactiveRpcError of RPC that terminated with:
+	status = StatusCode.INVALID_ARGUMENT
+	details = "Unable to parse UUID: fairmount"
+	debug_error_string = "UNKNOWN:Error received from peer ipv6:%5B::1%5D:6333 {grpc_message:"Unable to parse UUID: fairmount", grpc_status:3, created_time:"2025-05-06T09:10:03.769871+02:00"}"
+>
+2025-05-06 09:10:03,982 - contexto_solver_app - ERROR - Error during batch upsert near line 65536: <_InactiveRpcError of RPC that terminated with:
+	status = StatusCode.INVALID_ARGUMENT
+	details = "Unable to parse UUID: delk"
+	debug_error_string = "UNKNOWN:Error received from peer ipv6:%5B::1%5D:6333 {created_time:"2025-05-06T09:10:03.981629+02:00", grpc_status:3, grpc_message:"Unable to parse UUID: delk"}"
+>
+2025-05-06 09:10:04,180 - contexto_solver_app - ERROR - Error during batch upsert near line 69632: <_InactiveRpcError of RPC that terminated with:
+	status = StatusCode.INVALID_ARGUMENT
+	details = "Unable to parse UUID: gazi"
+	debug_error_string = "UNKNOWN:Error received from peer ipv6:%5B::1%5D:6333 {created_time:"2025-05-06T09:10:04.180578+02:00", grpc_status:3, grpc_message:"Unable to parse UUID: gazi"}"
+>
+2025-05-06 09:10:04,378 - contexto_solver_app - ERROR - Error during batch upsert near line 73728: <_InactiveRpcError of RPC that terminated with:
+	status = StatusCode.INVALID_ARGUMENT
+	details = "Unable to parse UUID: racha"
+	debug_error_string = "UNKNOWN:Error received from peer ipv6:%5B::1%5D:6333 {created_time:"2025-05-06T09:10:04.378804+02:00", grpc_status:3, grpc_message:"Unable to parse UUID: racha"}"
+>
+2025-05-06 09:10:04,579 - contexto_solver_app - ERROR - Error during batch upsert near line 77824: <_InactiveRpcError of RPC that terminated with:
+	status = StatusCode.INVALID_ARGUMENT
+	details = "Unable to parse UUID: 14-9"
+	debug_error_string = "UNKNOWN:Error received from peer ipv6:%5B::1%5D:6333 {grpc_message:"Unable to parse UUID: 14-9", grpc_status:3, created_time:"2025-05-06T09:10:04.579551+02:00"}"
+>
+2025-05-06 09:10:04,789 - contexto_solver_app - ERROR - Error during batch upsert near line 81920: <_InactiveRpcError of RPC that terminated with:
+	status = StatusCode.INVALID_ARGUMENT
+	details = "Unable to parse UUID: fuyang"
+	debug_error_string = "UNKNOWN:Error received from peer ipv6:%5B::1%5D:6333 {grpc_message:"Unable to parse UUID: fuyang", grpc_status:3, created_time:"2025-05-06T09:10:04.788749+02:00"}"
+>
+2025-05-06 09:10:04,983 - contexto_solver_app - ERROR - Error during batch upsert near line 86016: <_InactiveRpcError of RPC that terminated with:
+	status = StatusCode.INVALID_ARGUMENT
+	details = "Unable to parse UUID: alamitos"
+	debug_error_string = "UNKNOWN:Error received from peer ipv6:%5B::1%5D:6333 {created_time:"2025-05-06T09:10:04.983297+02:00", grpc_status:3, grpc_message:"Unable to parse UUID: alamitos"}"
+>
+2025-05-06 09:10:05,182 - contexto_solver_app - ERROR - Error during batch upsert near line 90112: <_InactiveRpcError of RPC that terminated with:
+	status = StatusCode.INVALID_ARGUMENT
+	details = "Unable to parse UUID: hasson"
+	debug_error_string = "UNKNOWN:Error received from peer ipv6:%5B::1%5D:6333 {grpc_message:"Unable to parse UUID: hasson", grpc_status:3, created_time:"2025-05-06T09:10:05.182225+02:00"}"
+>
+2025-05-06 09:10:05,380 - contexto_solver_app - ERROR - Error during batch upsert near line 94208: <_InactiveRpcError of RPC that terminated with:
+	status = StatusCode.INVALID_ARGUMENT
+	details = "Unable to parse UUID: botelho"
+	debug_error_string = "UNKNOWN:Error received from peer ipv6:%5B::1%5D:6333 {grpc_message:"Unable to parse UUID: botelho", grpc_status:3, created_time:"2025-05-06T09:10:05.38+02:00"}"
+>
+2025-05-06 09:10:05,590 - contexto_solver_app - ERROR - Error during batch upsert near line 98304: <_InactiveRpcError of RPC that terminated with:
+	status = StatusCode.INVALID_ARGUMENT
+	details = "Unable to parse UUID: exton"
+	debug_error_string = "UNKNOWN:Error received from peer ipv6:%5B::1%5D:6333 {created_time:"2025-05-06T09:10:05.590792+02:00", grpc_status:3, grpc_message:"Unable to parse UUID: exton"}"
+>
+2025-05-06 09:10:05,785 - contexto_solver_app - ERROR - Error during batch upsert near line 102400: <_InactiveRpcError of RPC that terminated with:
+	status = StatusCode.INVALID_ARGUMENT
+	details = "Unable to parse UUID: kraatz"
+	debug_error_string = "UNKNOWN:Error received from peer ipv6:%5B::1%5D:6333 {created_time:"2025-05-06T09:10:05.784911+02:00", grpc_status:3, grpc_message:"Unable to parse UUID: kraatz"}"
+>
+2025-05-06 09:10:05,982 - contexto_solver_app - ERROR - Error during batch upsert near line 106496: <_InactiveRpcError of RPC that terminated with:
+	status = StatusCode.INVALID_ARGUMENT
+	details = "Unable to parse UUID: amravati"
+	debug_error_string = "UNKNOWN:Error received from peer ipv6:%5B::1%5D:6333 {grpc_message:"Unable to parse UUID: amravati", grpc_status:3, created_time:"2025-05-06T09:10:05.98188+02:00"}"
+>
+2025-05-06 09:10:06,175 - contexto_solver_app - ERROR - Error during batch upsert near line 110592: <_InactiveRpcError of RPC that terminated with:
+	status = StatusCode.INVALID_ARGUMENT
+	details = "Unable to parse UUID: mastectomies"
+	debug_error_string = "UNKNOWN:Error received from peer ipv6:%5B::1%5D:6333 {grpc_message:"Unable to parse UUID: mastectomies", grpc_status:3, created_time:"2025-05-06T09:10:06.175632+02:00"}"
+>
+2025-05-06 09:10:06,381 - contexto_solver_app - ERROR - Error during batch upsert near line 114688: <_InactiveRpcError of RPC that terminated with:
+	status = StatusCode.INVALID_ARGUMENT
+	details = "Unable to parse UUID: certifiable"
+	debug_error_string = "UNKNOWN:Error received from peer ipv6:%5B::1%5D:6333 {created_time:"2025-05-06T09:10:06.380911+02:00", grpc_status:3, grpc_message:"Unable to parse UUID: certifiable"}"
+>
+2025-05-06 09:10:06,579 - contexto_solver_app - ERROR - Error during batch upsert near line 118784: <_InactiveRpcError of RPC that terminated with:
+	status = StatusCode.INVALID_ARGUMENT
+	details = "Unable to parse UUID: chipcom"
+	debug_error_string = "UNKNOWN:Error received from peer ipv6:%5B::1%5D:6333 {created_time:"2025-05-06T09:10:06.579338+02:00", grpc_status:3, grpc_message:"Unable to parse UUID: chipcom"}"
+>
+2025-05-06 09:10:06,774 - contexto_solver_app - ERROR - Error during batch upsert near line 122880: <_InactiveRpcError of RPC that terminated with:
+	status = StatusCode.INVALID_ARGUMENT
+	details = "Unable to parse UUID: lynnwood"
+	debug_error_string = "UNKNOWN:Error received from peer ipv6:%5B::1%5D:6333 {created_time:"2025-05-06T09:10:06.774174+02:00", grpc_status:3, grpc_message:"Unable to parse UUID: lynnwood"}"
+>
+2025-05-06 09:10:06,979 - contexto_solver_app - ERROR - Error during batch upsert near line 126976: <_InactiveRpcError of RPC that terminated with:
+	status = StatusCode.INVALID_ARGUMENT
+	details = "Unable to parse UUID: dawar"
+	debug_error_string = "UNKNOWN:Error received from peer ipv6:%5B::1%5D:6333 {grpc_message:"Unable to parse UUID: dawar", grpc_status:3, created_time:"2025-05-06T09:10:06.979226+02:00"}"
+>
+2025-05-06 09:10:07,175 - contexto_solver_app - ERROR - Error during batch upsert near line 131072: <_InactiveRpcError of RPC that terminated with:
+	status = StatusCode.INVALID_ARGUMENT
+	details = "Unable to parse UUID: tant"
+	debug_error_string = "UNKNOWN:Error received from peer ipv6:%5B::1%5D:6333 {grpc_message:"Unable to parse UUID: tant", grpc_status:3, created_time:"2025-05-06T09:10:07.175218+02:00"}"
+>
+2025-05-06 09:10:07,370 - contexto_solver_app - ERROR - Error during batch upsert near line 135168: <_InactiveRpcError of RPC that terminated with:
+	status = StatusCode.INVALID_ARGUMENT
+	details = "Unable to parse UUID: mediacom"
+	debug_error_string = "UNKNOWN:Error received from peer ipv6:%5B::1%5D:6333 {grpc_message:"Unable to parse UUID: mediacom", grpc_status:3, created_time:"2025-05-06T09:10:07.370226+02:00"}"
+>
+2025-05-06 09:10:07,565 - contexto_solver_app - ERROR - Error during batch upsert near line 139264: <_InactiveRpcError of RPC that terminated with:
+	status = StatusCode.INVALID_ARGUMENT
+	details = "Unable to parse UUID: pajaro"
+	debug_error_string = "UNKNOWN:Error received from peer ipv6:%5B::1%5D:6333 {created_time:"2025-05-06T09:10:07.565756+02:00", grpc_status:3, grpc_message:"Unable to parse UUID: pajaro"}"
+>
+2025-05-06 09:10:07,770 - contexto_solver_app - ERROR - Error during batch upsert near line 143360: <_InactiveRpcError of RPC that terminated with:
+	status = StatusCode.INVALID_ARGUMENT
+	details = "Unable to parse UUID: waldorf-astoria"
+	debug_error_string = "UNKNOWN:Error received from peer ipv6:%5B::1%5D:6333 {created_time:"2025-05-06T09:10:07.770591+02:00", grpc_status:3, grpc_message:"Unable to parse UUID: waldorf-astoria"}"
+>
+2025-05-06 09:10:07,964 - contexto_solver_app - ERROR - Error during batch upsert near line 147456: <_InactiveRpcError of RPC that terminated with:
+	status = StatusCode.INVALID_ARGUMENT
+	details = "Unable to parse UUID: mallam"
+	debug_error_string = "UNKNOWN:Error received from peer ipv6:%5B::1%5D:6333 {grpc_message:"Unable to parse UUID: mallam", grpc_status:3, created_time:"2025-05-06T09:10:07.964073+02:00"}"
+>
+2025-05-06 09:10:08,157 - contexto_solver_app - ERROR - Error during batch upsert near line 151552: <_InactiveRpcError of RPC that terminated with:
+	status = StatusCode.INVALID_ARGUMENT
+	details = "Unable to parse UUID: deliverymen"
+	debug_error_string = "UNKNOWN:Error received from peer ipv6:%5B::1%5D:6333 {created_time:"2025-05-06T09:10:08.157196+02:00", grpc_status:3, grpc_message:"Unable to parse UUID: deliverymen"}"
+>
+2025-05-06 09:10:08,355 - contexto_solver_app - ERROR - Error during batch upsert near line 155648: <_InactiveRpcError of RPC that terminated with:
+	status = StatusCode.INVALID_ARGUMENT
+	details = "Unable to parse UUID: coldfusion"
+	debug_error_string = "UNKNOWN:Error received from peer ipv6:%5B::1%5D:6333 {created_time:"2025-05-06T09:10:08.355238+02:00", grpc_status:3, grpc_message:"Unable to parse UUID: coldfusion"}"
+>
+2025-05-06 09:10:08,560 - contexto_solver_app - ERROR - Error during batch upsert near line 159744: <_InactiveRpcError of RPC that terminated with:
+	status = StatusCode.INVALID_ARGUMENT
+	details = "Unable to parse UUID: intramurals"
+	debug_error_string = "UNKNOWN:Error received from peer ipv6:%5B::1%5D:6333 {grpc_message:"Unable to parse UUID: intramurals", grpc_status:3, created_time:"2025-05-06T09:10:08.560757+02:00"}"
+>
+2025-05-06 09:10:08,753 - contexto_solver_app - ERROR - Error during batch upsert near line 163840: <_InactiveRpcError of RPC that terminated with:
+	status = StatusCode.INVALID_ARGUMENT
+	details = "Unable to parse UUID: teachout"
+	debug_error_string = "UNKNOWN:Error received from peer ipv6:%5B::1%5D:6333 {created_time:"2025-05-06T09:10:08.752786+02:00", grpc_status:3, grpc_message:"Unable to parse UUID: teachout"}"
+>
+2025-05-06 09:10:08,951 - contexto_solver_app - ERROR - Error during batch upsert near line 167936: <_InactiveRpcError of RPC that terminated with:
+	status = StatusCode.INVALID_ARGUMENT
+	details = "Unable to parse UUID: 50cc"
+	debug_error_string = "UNKNOWN:Error received from peer ipv6:%5B::1%5D:6333 {created_time:"2025-05-06T09:10:08.951258+02:00", grpc_status:3, grpc_message:"Unable to parse UUID: 50cc"}"
+>
+2025-05-06 09:10:09,147 - contexto_solver_app - ERROR - Error during batch upsert near line 172032: <_InactiveRpcError of RPC that terminated with:
+	status = StatusCode.INVALID_ARGUMENT
+	details = "Unable to parse UUID: 1-31"
+	debug_error_string = "UNKNOWN:Error received from peer ipv6:%5B::1%5D:6333 {created_time:"2025-05-06T09:10:09.14663+02:00", grpc_status:3, grpc_message:"Unable to parse UUID: 1-31"}"
+>
+2025-05-06 09:10:09,352 - contexto_solver_app - ERROR - Error during batch upsert near line 176128: <_InactiveRpcError of RPC that terminated with:
+	status = StatusCode.INVALID_ARGUMENT
+	details = "Unable to parse UUID: baudry"
+	debug_error_string = "UNKNOWN:Error received from peer ipv6:%5B::1%5D:6333 {created_time:"2025-05-06T09:10:09.352601+02:00", grpc_status:3, grpc_message:"Unable to parse UUID: baudry"}"
+>
+2025-05-06 09:10:09,545 - contexto_solver_app - ERROR - Error during batch upsert near line 180224: <_InactiveRpcError of RPC that terminated with:
+	status = StatusCode.INVALID_ARGUMENT
+	details = "Unable to parse UUID: helgeson"
+	debug_error_string = "UNKNOWN:Error received from peer ipv6:%5B::1%5D:6333 {created_time:"2025-05-06T09:10:09.545632+02:00", grpc_status:3, grpc_message:"Unable to parse UUID: helgeson"}"
+>
+2025-05-06 09:10:09,737 - contexto_solver_app - ERROR - Error during batch upsert near line 184320: <_InactiveRpcError of RPC that terminated with:
+	status = StatusCode.INVALID_ARGUMENT
+	details = "Unable to parse UUID: vaesteraas"
+	debug_error_string = "UNKNOWN:Error received from peer ipv6:%5B::1%5D:6333 {created_time:"2025-05-06T09:10:09.737485+02:00", grpc_status:3, grpc_message:"Unable to parse UUID: vaesteraas"}"
+>
+2025-05-06 09:10:09,940 - contexto_solver_app - ERROR - Error during batch upsert near line 188416: <_InactiveRpcError of RPC that terminated with:
+	status = StatusCode.INVALID_ARGUMENT
+	details = "Unable to parse UUID: smallman"
+	debug_error_string = "UNKNOWN:Error received from peer ipv6:%5B::1%5D:6333 {created_time:"2025-05-06T09:10:09.939839+02:00", grpc_status:3, grpc_message:"Unable to parse UUID: smallman"}"
+>
+2025-05-06 09:10:10,142 - contexto_solver_app - ERROR - Error during batch upsert near line 192512: <_InactiveRpcError of RPC that terminated with:
+	status = StatusCode.INVALID_ARGUMENT
+	details = "Unable to parse UUID: actinic"
+	debug_error_string = "UNKNOWN:Error received from peer ipv6:%5B::1%5D:6333 {grpc_message:"Unable to parse UUID: actinic", grpc_status:3, created_time:"2025-05-06T09:10:10.142613+02:00"}"
+>
+2025-05-06 09:10:10,336 - contexto_solver_app - ERROR - Error during batch upsert near line 196608: <_InactiveRpcError of RPC that terminated with:
+	status = StatusCode.INVALID_ARGUMENT
+	details = "Unable to parse UUID: boruch"
+	debug_error_string = "UNKNOWN:Error received from peer ipv6:%5B::1%5D:6333 {grpc_message:"Unable to parse UUID: boruch", grpc_status:3, created_time:"2025-05-06T09:10:10.336213+02:00"}"
+>
+2025-05-06 09:10:10,535 - contexto_solver_app - ERROR - Error during batch upsert near line 200704: <_InactiveRpcError of RPC that terminated with:
+	status = StatusCode.INVALID_ARGUMENT
+	details = "Unable to parse UUID: kislev"
+	debug_error_string = "UNKNOWN:Error received from peer ipv6:%5B::1%5D:6333 {created_time:"2025-05-06T09:10:10.535012+02:00", grpc_status:3, grpc_message:"Unable to parse UUID: kislev"}"
+>
+2025-05-06 09:10:10,739 - contexto_solver_app - ERROR - Error during batch upsert near line 204800: <_InactiveRpcError of RPC that terminated with:
+	status = StatusCode.INVALID_ARGUMENT
+	details = "Unable to parse UUID: aydar"
+	debug_error_string = "UNKNOWN:Error received from peer ipv6:%5B::1%5D:6333 {created_time:"2025-05-06T09:10:10.739281+02:00", grpc_status:3, grpc_message:"Unable to parse UUID: aydar"}"
+>
+2025-05-06 09:10:10,933 - contexto_solver_app - ERROR - Error during batch upsert near line 208896: <_InactiveRpcError of RPC that terminated with:
+	status = StatusCode.INVALID_ARGUMENT
+	details = "Unable to parse UUID: 109.35"
+	debug_error_string = "UNKNOWN:Error received from peer ipv6:%5B::1%5D:6333 {grpc_message:"Unable to parse UUID: 109.35", grpc_status:3, created_time:"2025-05-06T09:10:10.933237+02:00"}"
+>
+2025-05-06 09:10:11,130 - contexto_solver_app - ERROR - Error during batch upsert near line 212992: <_InactiveRpcError of RPC that terminated with:
+	status = StatusCode.INVALID_ARGUMENT
+	details = "Unable to parse UUID: phyllanthus"
+	debug_error_string = "UNKNOWN:Error received from peer ipv6:%5B::1%5D:6333 {grpc_message:"Unable to parse UUID: phyllanthus", grpc_status:3, created_time:"2025-05-06T09:10:11.129857+02:00"}"
+>
+2025-05-06 09:10:11,321 - contexto_solver_app - ERROR - Error during batch upsert near line 217088: <_InactiveRpcError of RPC that terminated with:
+	status = StatusCode.INVALID_ARGUMENT
+	details = "Unable to parse UUID: rachele"
+	debug_error_string = "UNKNOWN:Error received from peer ipv6:%5B::1%5D:6333 {grpc_message:"Unable to parse UUID: rachele", grpc_status:3, created_time:"2025-05-06T09:10:11.3212+02:00"}"
+>
+2025-05-06 09:10:11,528 - contexto_solver_app - ERROR - Error during batch upsert near line 221184: <_InactiveRpcError of RPC that terminated with:
+	status = StatusCode.INVALID_ARGUMENT
+	details = "Unable to parse UUID: amaryllidaceae"
+	debug_error_string = "UNKNOWN:Error received from peer ipv6:%5B::1%5D:6333 {grpc_message:"Unable to parse UUID: amaryllidaceae", grpc_status:3, created_time:"2025-05-06T09:10:11.528276+02:00"}"
+>
+2025-05-06 09:10:11,725 - contexto_solver_app - ERROR - Error during batch upsert near line 225280: <_InactiveRpcError of RPC that terminated with:
+	status = StatusCode.INVALID_ARGUMENT
+	details = "Unable to parse UUID: radhia"
+	debug_error_string = "UNKNOWN:Error received from peer ipv6:%5B::1%5D:6333 {created_time:"2025-05-06T09:10:11.724968+02:00", grpc_status:3, grpc_message:"Unable to parse UUID: radhia"}"
+>
+2025-05-06 09:10:11,921 - contexto_solver_app - ERROR - Error during batch upsert near line 229376: <_InactiveRpcError of RPC that terminated with:
+	status = StatusCode.INVALID_ARGUMENT
+	details = "Unable to parse UUID: ebri"
+	debug_error_string = "UNKNOWN:Error received from peer ipv6:%5B::1%5D:6333 {created_time:"2025-05-06T09:10:11.921243+02:00", grpc_status:3, grpc_message:"Unable to parse UUID: ebri"}"
+>
+2025-05-06 09:10:12,120 - contexto_solver_app - ERROR - Error during batch upsert near line 233472: <_InactiveRpcError of RPC that terminated with:
+	status = StatusCode.INVALID_ARGUMENT
+	details = "Unable to parse UUID: jakhar"
+	debug_error_string = "UNKNOWN:Error received from peer ipv6:%5B::1%5D:6333 {created_time:"2025-05-06T09:10:12.12063+02:00", grpc_status:3, grpc_message:"Unable to parse UUID: jakhar"}"
+>
+2025-05-06 09:10:12,327 - contexto_solver_app - ERROR - Error during batch upsert near line 237568: <_InactiveRpcError of RPC that terminated with:
+	status = StatusCode.INVALID_ARGUMENT
+	details = "Unable to parse UUID: 9.712"
+	debug_error_string = "UNKNOWN:Error received from peer ipv6:%5B::1%5D:6333 {created_time:"2025-05-06T09:10:12.32746+02:00", grpc_status:3, grpc_message:"Unable to parse UUID: 9.712"}"
+>
+2025-05-06 09:10:12,529 - contexto_solver_app - ERROR - Error during batch upsert near line 241664: <_InactiveRpcError of RPC that terminated with:
+	status = StatusCode.INVALID_ARGUMENT
+	details = "Unable to parse UUID: luzinski"
+	debug_error_string = "UNKNOWN:Error received from peer ipv6:%5B::1%5D:6333 {created_time:"2025-05-06T09:10:12.529459+02:00", grpc_status:3, grpc_message:"Unable to parse UUID: luzinski"}"
+>
+2025-05-06 09:10:12,726 - contexto_solver_app - ERROR - Error during batch upsert near line 245760: <_InactiveRpcError of RPC that terminated with:
+	status = StatusCode.INVALID_ARGUMENT
+	details = "Unable to parse UUID: sunyata"
+	debug_error_string = "UNKNOWN:Error received from peer ipv6:%5B::1%5D:6333 {created_time:"2025-05-06T09:10:12.726595+02:00", grpc_status:3, grpc_message:"Unable to parse UUID: sunyata"}"
+>
+2025-05-06 09:10:12,926 - contexto_solver_app - ERROR - Error during batch upsert near line 249856: <_InactiveRpcError of RPC that terminated with:
+	status = StatusCode.INVALID_ARGUMENT
+	details = "Unable to parse UUID: 219-212"
+	debug_error_string = "UNKNOWN:Error received from peer ipv6:%5B::1%5D:6333 {created_time:"2025-05-06T09:10:12.926788+02:00", grpc_status:3, grpc_message:"Unable to parse UUID: 219-212"}"
+>
+2025-05-06 09:10:13,138 - contexto_solver_app - ERROR - Error during batch upsert near line 253952: <_InactiveRpcError of RPC that terminated with:
+	status = StatusCode.INVALID_ARGUMENT
+	details = "Unable to parse UUID: 30-mm"
+	debug_error_string = "UNKNOWN:Error received from peer ipv6:%5B::1%5D:6333 {grpc_message:"Unable to parse UUID: 30-mm", grpc_status:3, created_time:"2025-05-06T09:10:13.138492+02:00"}"
+>
+2025-05-06 09:10:13,331 - contexto_solver_app - ERROR - Error during batch upsert near line 258048: <_InactiveRpcError of RPC that terminated with:
+	status = StatusCode.INVALID_ARGUMENT
+	details = "Unable to parse UUID: schaab"
+	debug_error_string = "UNKNOWN:Error received from peer ipv6:%5B::1%5D:6333 {grpc_message:"Unable to parse UUID: schaab", grpc_status:3, created_time:"2025-05-06T09:10:13.331771+02:00"}"
+>
+2025-05-06 09:10:13,530 - contexto_solver_app - ERROR - Error during batch upsert near line 262144: <_InactiveRpcError of RPC that terminated with:
+	status = StatusCode.INVALID_ARGUMENT
+	details = "Unable to parse UUID: draglines"
+	debug_error_string = "UNKNOWN:Error received from peer ipv6:%5B::1%5D:6333 {grpc_message:"Unable to parse UUID: draglines", grpc_status:3, created_time:"2025-05-06T09:10:13.530158+02:00"}"
+>
+2025-05-06 09:10:13,731 - contexto_solver_app - ERROR - Error during batch upsert near line 266240: <_InactiveRpcError of RPC that terminated with:
+	status = StatusCode.INVALID_ARGUMENT
+	details = "Unable to parse UUID: outleaped"
+	debug_error_string = "UNKNOWN:Error received from peer ipv6:%5B::1%5D:6333 {created_time:"2025-05-06T09:10:13.73088+02:00", grpc_status:3, grpc_message:"Unable to parse UUID: outleaped"}"
+>
+2025-05-06 09:10:13,940 - contexto_solver_app - ERROR - Error during batch upsert near line 270336: <_InactiveRpcError of RPC that terminated with:
+	status = StatusCode.INVALID_ARGUMENT
+	details = "Unable to parse UUID: hymne"
+	debug_error_string = "UNKNOWN:Error received from peer ipv6:%5B::1%5D:6333 {grpc_message:"Unable to parse UUID: hymne", grpc_status:3, created_time:"2025-05-06T09:10:13.940427+02:00"}"
+>
+2025-05-06 09:10:14,139 - contexto_solver_app - ERROR - Error during batch upsert near line 274432: <_InactiveRpcError of RPC that terminated with:
+	status = StatusCode.INVALID_ARGUMENT
+	details = "Unable to parse UUID: non-malay"
+	debug_error_string = "UNKNOWN:Error received from peer ipv6:%5B::1%5D:6333 {grpc_message:"Unable to parse UUID: non-malay", grpc_status:3, created_time:"2025-05-06T09:10:14.138951+02:00"}"
+>
+2025-05-06 09:10:14,339 - contexto_solver_app - ERROR - Error during batch upsert near line 278528: <_InactiveRpcError of RPC that terminated with:
+	status = StatusCode.INVALID_ARGUMENT
+	details = "Unable to parse UUID: arthroscope"
+	debug_error_string = "UNKNOWN:Error received from peer ipv6:%5B::1%5D:6333 {created_time:"2025-05-06T09:10:14.338764+02:00", grpc_status:3, grpc_message:"Unable to parse UUID: arthroscope"}"
+>
+2025-05-06 09:10:14,548 - contexto_solver_app - ERROR - Error during batch upsert near line 282624: <_InactiveRpcError of RPC that terminated with:
+	status = StatusCode.INVALID_ARGUMENT
+	details = "Unable to parse UUID: variates"
+	debug_error_string = "UNKNOWN:Error received from peer ipv6:%5B::1%5D:6333 {grpc_message:"Unable to parse UUID: variates", grpc_status:3, created_time:"2025-05-06T09:10:14.548161+02:00"}"
+>
+2025-05-06 09:10:14,747 - contexto_solver_app - ERROR - Error during batch upsert near line 286720: <_InactiveRpcError of RPC that terminated with:
+	status = StatusCode.INVALID_ARGUMENT
+	details = "Unable to parse UUID: bookout"
+	debug_error_string = "UNKNOWN:Error received from peer ipv6:%5B::1%5D:6333 {created_time:"2025-05-06T09:10:14.746949+02:00", grpc_status:3, grpc_message:"Unable to parse UUID: bookout"}"
+>
+2025-05-06 09:10:14,941 - contexto_solver_app - ERROR - Error during batch upsert near line 290816: <_InactiveRpcError of RPC that terminated with:
+	status = StatusCode.INVALID_ARGUMENT
+	details = "Unable to parse UUID: sorafenib"
+	debug_error_string = "UNKNOWN:Error received from peer ipv6:%5B::1%5D:6333 {created_time:"2025-05-06T09:10:14.94146+02:00", grpc_status:3, grpc_message:"Unable to parse UUID: sorafenib"}"
+>
+2025-05-06 09:10:15,139 - contexto_solver_app - ERROR - Error during batch upsert near line 294912: <_InactiveRpcError of RPC that terminated with:
+	status = StatusCode.INVALID_ARGUMENT
+	details = "Unable to parse UUID: cooh"
+	debug_error_string = "UNKNOWN:Error received from peer ipv6:%5B::1%5D:6333 {grpc_message:"Unable to parse UUID: cooh", grpc_status:3, created_time:"2025-05-06T09:10:15.139144+02:00"}"
+>
+2025-05-06 09:10:15,345 - contexto_solver_app - ERROR - Error during batch upsert near line 299008: <_InactiveRpcError of RPC that terminated with:
+	status = StatusCode.INVALID_ARGUMENT
+	details = "Unable to parse UUID: pilli"
+	debug_error_string = "UNKNOWN:Error received from peer ipv6:%5B::1%5D:6333 {grpc_message:"Unable to parse UUID: pilli", grpc_status:3, created_time:"2025-05-06T09:10:15.345674+02:00"}"
+>
+2025-05-06 09:10:15,544 - contexto_solver_app - ERROR - Error during batch upsert near line 303104: <_InactiveRpcError of RPC that terminated with:
+	status = StatusCode.INVALID_ARGUMENT
+	details = "Unable to parse UUID: semente"
+	debug_error_string = "UNKNOWN:Error received from peer ipv6:%5B::1%5D:6333 {created_time:"2025-05-06T09:10:15.544265+02:00", grpc_status:3, grpc_message:"Unable to parse UUID: semente"}"
+>
+2025-05-06 09:10:15,741 - contexto_solver_app - ERROR - Error during batch upsert near line 307200: <_InactiveRpcError of RPC that terminated with:
+	status = StatusCode.INVALID_ARGUMENT
+	details = "Unable to parse UUID: catarino"
+	debug_error_string = "UNKNOWN:Error received from peer ipv6:%5B::1%5D:6333 {grpc_message:"Unable to parse UUID: catarino", grpc_status:3, created_time:"2025-05-06T09:10:15.741388+02:00"}"
+>
+2025-05-06 09:10:15,939 - contexto_solver_app - ERROR - Error during batch upsert near line 311296: <_InactiveRpcError of RPC that terminated with:
+	status = StatusCode.INVALID_ARGUMENT
+	details = "Unable to parse UUID: garishness"
+	debug_error_string = "UNKNOWN:Error received from peer ipv6:%5B::1%5D:6333 {grpc_message:"Unable to parse UUID: garishness", grpc_status:3, created_time:"2025-05-06T09:10:15.938977+02:00"}"
+>
+2025-05-06 09:10:16,149 - contexto_solver_app - ERROR - Error during batch upsert near line 315392: <_InactiveRpcError of RPC that terminated with:
+	status = StatusCode.INVALID_ARGUMENT
+	details = "Unable to parse UUID: 62.14"
+	debug_error_string = "UNKNOWN:Error received from peer ipv6:%5B::1%5D:6333 {created_time:"2025-05-06T09:10:16.149055+02:00", grpc_status:3, grpc_message:"Unable to parse UUID: 62.14"}"
+>
+2025-05-06 09:10:16,349 - contexto_solver_app - ERROR - Error during batch upsert near line 319488: <_InactiveRpcError of RPC that terminated with:
+	status = StatusCode.INVALID_ARGUMENT
+	details = "Unable to parse UUID: 0155"
+	debug_error_string = "UNKNOWN:Error received from peer ipv6:%5B::1%5D:6333 {grpc_message:"Unable to parse UUID: 0155", grpc_status:3, created_time:"2025-05-06T09:10:16.349331+02:00"}"
+>
+2025-05-06 09:10:16,546 - contexto_solver_app - ERROR - Error during batch upsert near line 323584: <_InactiveRpcError of RPC that terminated with:
+	status = StatusCode.INVALID_ARGUMENT
+	details = "Unable to parse UUID: llanover"
+	debug_error_string = "UNKNOWN:Error received from peer ipv6:%5B::1%5D:6333 {grpc_message:"Unable to parse UUID: llanover", grpc_status:3, created_time:"2025-05-06T09:10:16.545803+02:00"}"
+>
+2025-05-06 09:10:16,740 - contexto_solver_app - ERROR - Error during batch upsert near line 327680: <_InactiveRpcError of RPC that terminated with:
+	status = StatusCode.INVALID_ARGUMENT
+	details = "Unable to parse UUID: 5,875"
+	debug_error_string = "UNKNOWN:Error received from peer ipv6:%5B::1%5D:6333 {grpc_message:"Unable to parse UUID: 5,875", grpc_status:3, created_time:"2025-05-06T09:10:16.740551+02:00"}"
+>
+2025-05-06 09:10:16,948 - contexto_solver_app - ERROR - Error during batch upsert near line 331776: <_InactiveRpcError of RPC that terminated with:
+	status = StatusCode.INVALID_ARGUMENT
+	details = "Unable to parse UUID: wetterstein"
+	debug_error_string = "UNKNOWN:Error received from peer ipv6:%5B::1%5D:6333 {grpc_message:"Unable to parse UUID: wetterstein", grpc_status:3, created_time:"2025-05-06T09:10:16.948119+02:00"}"
+>
+2025-05-06 09:10:17,142 - contexto_solver_app - ERROR - Error during batch upsert near line 335872: <_InactiveRpcError of RPC that terminated with:
+	status = StatusCode.INVALID_ARGUMENT
+	details = "Unable to parse UUID: cruis"
+	debug_error_string = "UNKNOWN:Error received from peer ipv6:%5B::1%5D:6333 {created_time:"2025-05-06T09:10:17.14276+02:00", grpc_status:3, grpc_message:"Unable to parse UUID: cruis"}"
+>
+2025-05-06 09:10:17,340 - contexto_solver_app - ERROR - Error during batch upsert near line 339968: <_InactiveRpcError of RPC that terminated with:
+	status = StatusCode.INVALID_ARGUMENT
+	details = "Unable to parse UUID: metzker"
+	debug_error_string = "UNKNOWN:Error received from peer ipv6:%5B::1%5D:6333 {created_time:"2025-05-06T09:10:17.340344+02:00", grpc_status:3, grpc_message:"Unable to parse UUID: metzker"}"
+>
+2025-05-06 09:10:17,540 - contexto_solver_app - ERROR - Error during batch upsert near line 344064: <_InactiveRpcError of RPC that terminated with:
+	status = StatusCode.INVALID_ARGUMENT
+	details = "Unable to parse UUID: grombach"
+	debug_error_string = "UNKNOWN:Error received from peer ipv6:%5B::1%5D:6333 {created_time:"2025-05-06T09:10:17.539998+02:00", grpc_status:3, grpc_message:"Unable to parse UUID: grombach"}"
+>
+2025-05-06 09:10:17,750 - contexto_solver_app - ERROR - Error during batch upsert near line 348160: <_InactiveRpcError of RPC that terminated with:
+	status = StatusCode.INVALID_ARGUMENT
+	details = "Unable to parse UUID: on-course"
+	debug_error_string = "UNKNOWN:Error received from peer ipv6:%5B::1%5D:6333 {created_time:"2025-05-06T09:10:17.749993+02:00", grpc_status:3, grpc_message:"Unable to parse UUID: on-course"}"
+>
+2025-05-06 09:10:17,946 - contexto_solver_app - ERROR - Error during batch upsert near line 352256: <_InactiveRpcError of RPC that terminated with:
+	status = StatusCode.INVALID_ARGUMENT
+	details = "Unable to parse UUID: dahrran"
+	debug_error_string = "UNKNOWN:Error received from peer ipv6:%5B::1%5D:6333 {grpc_message:"Unable to parse UUID: dahrran", grpc_status:3, created_time:"2025-05-06T09:10:17.946804+02:00"}"
+>
+2025-05-06 09:10:18,148 - contexto_solver_app - ERROR - Error during batch upsert near line 356352: <_InactiveRpcError of RPC that terminated with:
+	status = StatusCode.INVALID_ARGUMENT
+	details = "Unable to parse UUID: rifki"
+	debug_error_string = "UNKNOWN:Error received from peer ipv6:%5B::1%5D:6333 {created_time:"2025-05-06T09:10:18.148594+02:00", grpc_status:3, grpc_message:"Unable to parse UUID: rifki"}"
+>
+2025-05-06 09:10:18,356 - contexto_solver_app - ERROR - Error during batch upsert near line 360448: <_InactiveRpcError of RPC that terminated with:
+	status = StatusCode.INVALID_ARGUMENT
+	details = "Unable to parse UUID: nyt13"
+	debug_error_string = "UNKNOWN:Error received from peer ipv6:%5B::1%5D:6333 {created_time:"2025-05-06T09:10:18.356512+02:00", grpc_status:3, grpc_message:"Unable to parse UUID: nyt13"}"
+>
+2025-05-06 09:10:18,552 - contexto_solver_app - ERROR - Error during batch upsert near line 364544: <_InactiveRpcError of RPC that terminated with:
+	status = StatusCode.INVALID_ARGUMENT
+	details = "Unable to parse UUID: ilko"
+	debug_error_string = "UNKNOWN:Error received from peer ipv6:%5B::1%5D:6333 {created_time:"2025-05-06T09:10:18.552149+02:00", grpc_status:3, grpc_message:"Unable to parse UUID: ilko"}"
+>
+2025-05-06 09:10:18,748 - contexto_solver_app - ERROR - Error during batch upsert near line 368640: <_InactiveRpcError of RPC that terminated with:
+	status = StatusCode.INVALID_ARGUMENT
+	details = "Unable to parse UUID: jazzwise"
+	debug_error_string = "UNKNOWN:Error received from peer ipv6:%5B::1%5D:6333 {created_time:"2025-05-06T09:10:18.748205+02:00", grpc_status:3, grpc_message:"Unable to parse UUID: jazzwise"}"
+>
+2025-05-06 09:10:18,941 - contexto_solver_app - ERROR - Error during batch upsert near line 372736: <_InactiveRpcError of RPC that terminated with:
+	status = StatusCode.INVALID_ARGUMENT
+	details = "Unable to parse UUID: vice-regent"
+	debug_error_string = "UNKNOWN:Error received from peer ipv6:%5B::1%5D:6333 {created_time:"2025-05-06T09:10:18.941655+02:00", grpc_status:3, grpc_message:"Unable to parse UUID: vice-regent"}"
+>
+2025-05-06 09:10:19,145 - contexto_solver_app - ERROR - Error during batch upsert near line 376832: <_InactiveRpcError of RPC that terminated with:
+	status = StatusCode.INVALID_ARGUMENT
+	details = "Unable to parse UUID: daytonas"
+	debug_error_string = "UNKNOWN:Error received from peer ipv6:%5B::1%5D:6333 {created_time:"2025-05-06T09:10:19.145028+02:00", grpc_status:3, grpc_message:"Unable to parse UUID: daytonas"}"
+>
+2025-05-06 09:10:19,339 - contexto_solver_app - ERROR - Error during batch upsert near line 380928: <_InactiveRpcError of RPC that terminated with:
+	status = StatusCode.INVALID_ARGUMENT
+	details = "Unable to parse UUID: maflahi"
+	debug_error_string = "UNKNOWN:Error received from peer ipv6:%5B::1%5D:6333 {grpc_message:"Unable to parse UUID: maflahi", grpc_status:3, created_time:"2025-05-06T09:10:19.339798+02:00"}"
+>
+2025-05-06 09:10:19,540 - contexto_solver_app - ERROR - Error during batch upsert near line 385024: <_InactiveRpcError of RPC that terminated with:
+	status = StatusCode.INVALID_ARGUMENT
+	details = "Unable to parse UUID: 5,723"
+	debug_error_string = "UNKNOWN:Error received from peer ipv6:%5B::1%5D:6333 {grpc_message:"Unable to parse UUID: 5,723", grpc_status:3, created_time:"2025-05-06T09:10:19.540095+02:00"}"
+>
+2025-05-06 09:10:19,737 - contexto_solver_app - ERROR - Error during batch upsert near line 389120: <_InactiveRpcError of RPC that terminated with:
+	status = StatusCode.INVALID_ARGUMENT
+	details = "Unable to parse UUID: 36-8"
+	debug_error_string = "UNKNOWN:Error received from peer ipv6:%5B::1%5D:6333 {created_time:"2025-05-06T09:10:19.737186+02:00", grpc_status:3, grpc_message:"Unable to parse UUID: 36-8"}"
+>
+2025-05-06 09:10:19,942 - contexto_solver_app - ERROR - Error during batch upsert near line 393216: <_InactiveRpcError of RPC that terminated with:
+	status = StatusCode.INVALID_ARGUMENT
+	details = "Unable to parse UUID: integralist"
+	debug_error_string = "UNKNOWN:Error received from peer ipv6:%5B::1%5D:6333 {created_time:"2025-05-06T09:10:19.942651+02:00", grpc_status:3, grpc_message:"Unable to parse UUID: integralist"}"
+>
+2025-05-06 09:10:20,144 - contexto_solver_app - ERROR - Error during batch upsert near line 397312: <_InactiveRpcError of RPC that terminated with:
+	status = StatusCode.INVALID_ARGUMENT
+	details = "Unable to parse UUID: bobbito"
+	debug_error_string = "UNKNOWN:Error received from peer ipv6:%5B::1%5D:6333 {grpc_message:"Unable to parse UUID: bobbito", grpc_status:3, created_time:"2025-05-06T09:10:20.144394+02:00"}"
+>
+2025-05-06 09:10:20,277 - contexto_solver_app - ERROR - Error during batch upsert near line 400001: <_InactiveRpcError of RPC that terminated with:
+	status = StatusCode.INVALID_ARGUMENT
+	details = "Unable to parse UUID: defossez"
+	debug_error_string = "UNKNOWN:Error received from peer ipv6:%5B::1%5D:6333 {created_time:"2025-05-06T09:10:20.277126+02:00", grpc_status:3, grpc_message:"Unable to parse UUID: defossez"}"
+>
+2025-05-06 09:10:20,278 - contexto_solver_app - INFO - Finished upserting 0 embeddings into 'glove.6B.100d'. Skipped 0 lines.
+2025-05-06 09:10:20,278 - contexto_solver_app - INFO - Qdrant setup script finished.
+2025-05-06 09:16:33,762 - contexto_solver_app - INFO - Starting setup process for dataset: glove.6B.100d
+2025-05-06 09:16:33,762 - contexto_solver_app - INFO - Dataset details: URL=https://huggingface.co/stanfordnlp/glove/resolve/main/glove.6B.zip, Filename=glove.6B.100d.txt, Vector Size=100
+2025-05-06 09:16:33,763 - contexto_solver_app - INFO - Embeddings file .data/glove.6B.100d.txt already exists. Skipping download and extraction.
+2025-05-06 09:16:33,763 - contexto_solver_app - INFO - Connecting to Qdrant at localhost:6333...
+2025-05-06 09:16:33,803 - contexto_solver_app - INFO - Successfully connected to Qdrant.
+2025-05-06 09:16:33,809 - contexto_solver_app - INFO - Collection 'glove.6B.100d' already exists.
+2025-05-06 09:16:33,809 - contexto_solver_app - INFO - Starting upsert process for .data/glove.6B.100d.txt into 'glove.6B.100d'...
+2025-05-06 09:16:59,499 - contexto_solver_app - INFO - Finished upserting 400001 embeddings into 'glove.6B.100d'. Skipped 0 lines.
+2025-05-06 09:16:59,499 - contexto_solver_app - INFO - Qdrant setup script finished.
+2025-05-06 09:19:44,770 - contexto_solver_app - INFO - Initializing Contexto Game with collection: glove.6B.100d
+2025-05-06 09:19:44,771 - contexto_solver_app - INFO - Attempting to connect to Qdrant...
+2025-05-06 09:19:44,840 - contexto_solver_app - INFO - Successfully connected to Qdrant at localhost:6334.
+2025-05-06 09:19:44,841 - contexto_solver_app - INFO - Fetching collection info for 'glove.6B.100d'...
+2025-05-06 09:19:44,845 - contexto_solver_app - INFO - Successfully fetched info for collection 'glove.6B.100d'.
+2025-05-06 09:19:44,846 - contexto_solver_app - INFO - Selecting a random point from 'glove.6B.100d'...
+2025-05-06 09:19:44,852 - contexto_solver_app - INFO - Randomly selected point ID: 398904, Word: doombot
+2025-05-06 09:19:44,852 - contexto_solver_app - INFO - Target word selected: 'doombot' (ID: 398904)
+2025-05-06 09:19:44,853 - contexto_solver_app - INFO - Computing similarities for all 800002 points in 'glove.6B.100d'...
+2025-05-06 09:20:03,768 - contexto_solver_app - INFO - Successfully computed and ranked similarities with vectors for 399992 words.
+2025-05-06 09:20:04,462 - contexto_solver_app - INFO - Contexto Game initialized successfully for target 'doombot'. 399992 word similarities ranked.
+2025-05-06 09:20:04,463 - contexto_solver_app - INFO - New game started successfully. Target: doombot
+2025-05-06 09:20:12,538 - contexto_solver_app - INFO - Guess added: 'car' (Rank: 792793)
+2025-05-06 09:24:36,902 - contexto_solver_app - INFO - Initializing Contexto Game with collection: glove.6B.100d
+2025-05-06 09:24:36,903 - contexto_solver_app - INFO - Attempting to connect to Qdrant...
+2025-05-06 09:24:36,971 - contexto_solver_app - INFO - Successfully connected to Qdrant at localhost:6334.
+2025-05-06 09:24:36,972 - contexto_solver_app - INFO - Fetching collection info for 'glove.6B.100d'...
+2025-05-06 09:24:36,975 - contexto_solver_app - INFO - Successfully fetched info for collection 'glove.6B.100d'.
+2025-05-06 09:24:36,976 - contexto_solver_app - INFO - Selecting a random point from 'glove.6B.100d'...
+2025-05-06 09:24:36,981 - contexto_solver_app - INFO - Randomly selected point ID: 00001581-5012-5a81-959b-ffa094b95589, Word: 219.3
+2025-05-06 09:24:36,981 - contexto_solver_app - INFO - Target word selected: '219.3' (ID: 00001581-5012-5a81-959b-ffa094b95589)
+2025-05-06 09:24:36,982 - contexto_solver_app - INFO - Computing similarities for all 800002 points in 'glove.6B.100d'...
+2025-05-06 09:24:55,623 - contexto_solver_app - INFO - Successfully computed and ranked similarities with vectors for 399992 words.
+2025-05-06 09:24:56,308 - contexto_solver_app - INFO - Contexto Game initialized successfully for target '219.3'. 399992 word similarities ranked.
+2025-05-06 09:24:56,309 - contexto_solver_app - INFO - New game started successfully. Target: 219.3
+2025-05-06 09:37:31,445 - contexto_solver_app - INFO - Starting setup process for dataset: glove.6B.100d
+2025-05-06 09:37:31,445 - contexto_solver_app - INFO - Dataset details: URL=https://huggingface.co/stanfordnlp/glove/resolve/main/glove.6B.zip, Filename=glove.6B.100d.txt, Vector Size=100
+2025-05-06 09:37:31,445 - contexto_solver_app - INFO - Embeddings file .data/glove.6B.100d.txt already exists. Skipping download and extraction.
+2025-05-06 09:37:31,445 - contexto_solver_app - INFO - Connecting to Qdrant at localhost:6333...
+2025-05-06 09:37:31,497 - contexto_solver_app - INFO - Successfully connected to Qdrant.
+2025-05-06 09:37:31,503 - contexto_solver_app - INFO - Collection 'glove.6B.100d' already exists. Deleting and recreating.
+2025-05-06 09:37:31,685 - contexto_solver_app - INFO - Collection 'glove.6B.100d' recreated successfully.
+2025-05-06 09:37:31,685 - contexto_solver_app - INFO - Starting upsert process for .data/glove.6B.100d.txt into 'glove.6B.100d'...
+2025-05-06 09:37:41,792 - contexto_solver_app - INFO - Finished upserting 85554 embeddings into 'glove.6B.100d'. Skipped 314447 lines.
+2025-05-06 09:37:41,792 - contexto_solver_app - INFO - Qdrant setup script finished.
+2025-05-06 09:38:08,575 - contexto_solver_app - INFO - Starting setup process for dataset: glove.6B.100d
+2025-05-06 09:38:08,575 - contexto_solver_app - INFO - Dataset details: URL=https://huggingface.co/stanfordnlp/glove/resolve/main/glove.6B.zip, Filename=glove.6B.100d.txt, Vector Size=100
+2025-05-06 09:38:08,575 - contexto_solver_app - INFO - Embeddings file .data/glove.6B.100d.txt already exists. Skipping download and extraction.
+2025-05-06 09:38:08,575 - contexto_solver_app - INFO - Connecting to Qdrant at localhost:6333...
+2025-05-06 09:38:08,615 - contexto_solver_app - INFO - Successfully connected to Qdrant.
+2025-05-06 09:38:08,620 - contexto_solver_app - INFO - Collection 'glove.6B.100d' already exists. Deleting and recreating.
+2025-05-06 09:38:08,783 - contexto_solver_app - INFO - Collection 'glove.6B.100d' recreated successfully.
+2025-05-06 09:38:08,783 - contexto_solver_app - INFO - Starting upsert process for .data/glove.6B.100d.txt into 'glove.6B.100d'...
+2025-05-06 09:38:18,955 - contexto_solver_app - INFO - Finished upserting 85554 embeddings into 'glove.6B.100d'. Skipped 314447 lines.
+2025-05-06 09:38:18,955 - contexto_solver_app - INFO - Qdrant setup script finished.
+2025-05-06 09:38:34,304 - contexto_solver_app - INFO - Initializing Contexto Game with collection: glove.6B.100d
+2025-05-06 09:38:34,305 - contexto_solver_app - INFO - Attempting to connect to Qdrant...
+2025-05-06 09:38:34,371 - contexto_solver_app - INFO - Successfully connected to Qdrant at localhost:6334.
+2025-05-06 09:38:34,371 - contexto_solver_app - INFO - Fetching collection info for 'glove.6B.100d'...
+2025-05-06 09:38:34,375 - contexto_solver_app - INFO - Successfully fetched info for collection 'glove.6B.100d'.
+2025-05-06 09:38:34,376 - contexto_solver_app - INFO - Selecting a random point from 'glove.6B.100d'...
+2025-05-06 09:38:34,381 - contexto_solver_app - INFO - Randomly selected point ID: 00011877-2895-5fc8-b26e-288d3e23ec91, Word: trauma
+2025-05-06 09:38:34,381 - contexto_solver_app - INFO - Target word selected: 'trauma' (ID: 00011877-2895-5fc8-b26e-288d3e23ec91)
+2025-05-06 09:38:34,382 - contexto_solver_app - INFO - Computing similarities for all 85554 points in 'glove.6B.100d'...
+2025-05-06 09:38:36,371 - contexto_solver_app - INFO - Successfully computed and ranked similarities with vectors for 85554 words.
+2025-05-06 09:38:36,458 - contexto_solver_app - INFO - Contexto Game initialized successfully for target 'trauma'. 85554 word similarities ranked.
+2025-05-06 09:38:36,459 - contexto_solver_app - INFO - New game started successfully. Target: trauma
+2025-05-06 09:38:43,582 - contexto_solver_app - INFO - Guess added: 'pain' (Rank: 4)
+2025-05-06 09:38:50,385 - contexto_solver_app - INFO - Guess added: 'car' (Rank: 9349)
+2025-05-06 09:38:54,813 - contexto_solver_app - INFO - Guess added: 'plane' (Rank: 3324)
+2025-05-06 09:39:28,098 - contexto_solver_app - INFO - Guess added: 'child' (Rank: 265)
+2025-05-06 09:39:38,519 - contexto_solver_app - INFO - Invalid guess: 'paracetamol' not found in similarity list.
+2025-05-06 09:39:41,625 - contexto_solver_app - INFO - Invalid guess: 'caca' not found in similarity list.
+2025-05-06 09:39:45,103 - contexto_solver_app - INFO - Invalid guess: 'pepe' not found in similarity list.
+2025-05-06 09:39:48,678 - contexto_solver_app - INFO - Invalid guess: 'qdrant' not found in similarity list.
+2025-05-06 09:39:57,894 - contexto_solver_app - INFO - Guess added: 'helicopter' (Rank: 3165)
+2025-05-06 09:40:05,270 - contexto_solver_app - INFO - Guess added: 'doctor' (Rank: 186)
+2025-05-06 09:40:12,207 - contexto_solver_app - INFO - Guess added: 'wound' (Rank: 69)
+2025-05-06 09:40:17,196 - contexto_solver_app - INFO - Guess added: 'head' (Rank: 1527)
+2025-05-06 09:40:25,923 - contexto_solver_app - INFO - Guess added: 'brain' (Rank: 34)
+2025-05-06 09:40:33,128 - contexto_solver_app - INFO - Guess added: 'depression' (Rank: 21)
+2025-05-06 09:40:42,337 - contexto_solver_app - INFO - Invalid guess: 'schizofrenia' not found in similarity list.
+2025-05-06 09:40:47,105 - contexto_solver_app - INFO - Guess added: 'trauma' (Rank: 1)
+2025-05-06 09:44:45,861 - contexto_solver_app - INFO - Initializing Contexto Game with collection: glove.6B.100d
+2025-05-06 09:44:45,862 - contexto_solver_app - INFO - Attempting to connect to Qdrant...
+2025-05-06 09:44:45,929 - contexto_solver_app - INFO - Successfully connected to Qdrant at localhost:6334.
+2025-05-06 09:44:45,929 - contexto_solver_app - INFO - Fetching collection info for 'glove.6B.100d'...
+2025-05-06 09:44:45,932 - contexto_solver_app - INFO - Successfully fetched info for collection 'glove.6B.100d'.
+2025-05-06 09:44:45,933 - contexto_solver_app - INFO - Selecting a random point from 'glove.6B.100d'...
+2025-05-06 09:44:45,938 - contexto_solver_app - INFO - Randomly selected point ID: 00011877-2895-5fc8-b26e-288d3e23ec91, Word: trauma
+2025-05-06 09:44:45,938 - contexto_solver_app - INFO - Target word selected: 'trauma' (ID: 00011877-2895-5fc8-b26e-288d3e23ec91)
+2025-05-06 09:44:45,938 - contexto_solver_app - INFO - Computing similarities for all 85554 points in 'glove.6B.100d'...
+2025-05-06 09:44:47,897 - contexto_solver_app - INFO - Successfully computed and ranked similarities with vectors for 85554 words.
+2025-05-06 09:44:47,982 - contexto_solver_app - INFO - Contexto Game initialized successfully for target 'trauma'. 85554 word similarities ranked.
+2025-05-06 09:44:47,982 - contexto_solver_app - INFO - New game started successfully. Target: trauma
+2025-05-06 09:44:55,559 - contexto_solver_app - INFO - Initializing Contexto Game with collection: glove.6B.100d
+2025-05-06 09:44:55,560 - contexto_solver_app - INFO - Target word selected: 'trauma' (ID: 00011877-2895-5fc8-b26e-288d3e23ec91)
+2025-05-06 09:44:55,691 - contexto_solver_app - INFO - Contexto Game initialized successfully for target 'trauma'. 85554 word similarities ranked.
+2025-05-06 09:44:55,692 - contexto_solver_app - INFO - New game started successfully. Target: trauma
+2025-05-06 09:44:58,470 - contexto_solver_app - INFO - Initializing Contexto Game with collection: glove.6B.100d
+2025-05-06 09:44:58,471 - contexto_solver_app - INFO - Target word selected: 'trauma' (ID: 00011877-2895-5fc8-b26e-288d3e23ec91)
+2025-05-06 09:44:58,581 - contexto_solver_app - INFO - Contexto Game initialized successfully for target 'trauma'. 85554 word similarities ranked.
+2025-05-06 09:44:58,581 - contexto_solver_app - INFO - New game started successfully. Target: trauma
+2025-05-06 09:48:30,179 - contexto_solver_app - INFO - Initializing Contexto Game with collection: glove.6B.100d
+2025-05-06 09:48:30,179 - contexto_solver_app - INFO - Selecting a random point from 'glove.6B.100d'...
+2025-05-06 09:48:30,184 - contexto_solver_app - INFO - Randomly selected point ID: 00011877-2895-5fc8-b26e-288d3e23ec91, Word: trauma
+2025-05-06 09:48:30,184 - contexto_solver_app - INFO - Target word selected: 'trauma' (ID: 00011877-2895-5fc8-b26e-288d3e23ec91)
+2025-05-06 09:48:30,301 - contexto_solver_app - INFO - Contexto Game initialized successfully for target 'trauma'. 85554 word similarities ranked.
+2025-05-06 09:48:30,301 - contexto_solver_app - INFO - New game started successfully. Target: trauma
+2025-05-06 09:48:31,019 - contexto_solver_app - INFO - Initializing Contexto Game with collection: glove.6B.100d
+2025-05-06 09:48:31,020 - contexto_solver_app - INFO - Selecting a random point from 'glove.6B.100d'...
+2025-05-06 09:48:31,026 - contexto_solver_app - INFO - Randomly selected point ID: 00011877-2895-5fc8-b26e-288d3e23ec91, Word: trauma
+2025-05-06 09:48:31,026 - contexto_solver_app - INFO - Target word selected: 'trauma' (ID: 00011877-2895-5fc8-b26e-288d3e23ec91)
+2025-05-06 09:48:31,131 - contexto_solver_app - INFO - Contexto Game initialized successfully for target 'trauma'. 85554 word similarities ranked.
+2025-05-06 09:48:31,132 - contexto_solver_app - INFO - New game started successfully. Target: trauma
+2025-05-06 09:48:45,750 - contexto_solver_app - INFO - Initializing Contexto Game with collection: glove.6B.100d
+2025-05-06 09:48:45,751 - contexto_solver_app - INFO - Attempting to connect to Qdrant...
+2025-05-06 09:48:45,819 - contexto_solver_app - INFO - Successfully connected to Qdrant at localhost:6334.
+2025-05-06 09:48:45,819 - contexto_solver_app - INFO - Fetching collection info for 'glove.6B.100d'...
+2025-05-06 09:48:45,823 - contexto_solver_app - INFO - Successfully fetched info for collection 'glove.6B.100d'.
+2025-05-06 09:48:45,823 - contexto_solver_app - INFO - Selecting a random point from 'glove.6B.100d'...
+2025-05-06 09:48:45,828 - contexto_solver_app - INFO - Randomly selected point ID: 00011877-2895-5fc8-b26e-288d3e23ec91, Word: trauma
+2025-05-06 09:48:45,828 - contexto_solver_app - INFO - Target word selected: 'trauma' (ID: 00011877-2895-5fc8-b26e-288d3e23ec91)
+2025-05-06 09:48:45,828 - contexto_solver_app - INFO - Computing similarities for all 85554 points in 'glove.6B.100d'...
+2025-05-06 09:48:47,803 - contexto_solver_app - INFO - Successfully computed and ranked similarities with vectors for 85554 words.
+2025-05-06 09:48:47,888 - contexto_solver_app - INFO - Contexto Game initialized successfully for target 'trauma'. 85554 word similarities ranked.
+2025-05-06 09:48:47,889 - contexto_solver_app - INFO - New game started successfully. Target: trauma
+2025-05-06 09:48:49,998 - contexto_solver_app - INFO - Initializing Contexto Game with collection: glove.6B.100d
+2025-05-06 09:48:49,999 - contexto_solver_app - INFO - Selecting a random point from 'glove.6B.100d'...
+2025-05-06 09:48:50,005 - contexto_solver_app - INFO - Randomly selected point ID: 00011877-2895-5fc8-b26e-288d3e23ec91, Word: trauma
+2025-05-06 09:48:50,005 - contexto_solver_app - INFO - Target word selected: 'trauma' (ID: 00011877-2895-5fc8-b26e-288d3e23ec91)
+2025-05-06 09:48:50,137 - contexto_solver_app - INFO - Contexto Game initialized successfully for target 'trauma'. 85554 word similarities ranked.
+2025-05-06 09:48:50,137 - contexto_solver_app - INFO - New game started successfully. Target: trauma
+2025-05-06 09:48:51,871 - contexto_solver_app - INFO - Initializing Contexto Game with collection: glove.6B.100d
+2025-05-06 09:48:51,871 - contexto_solver_app - INFO - Selecting a random point from 'glove.6B.100d'...
+2025-05-06 09:48:51,876 - contexto_solver_app - INFO - Randomly selected point ID: 00011877-2895-5fc8-b26e-288d3e23ec91, Word: trauma
+2025-05-06 09:48:51,877 - contexto_solver_app - INFO - Target word selected: 'trauma' (ID: 00011877-2895-5fc8-b26e-288d3e23ec91)
+2025-05-06 09:48:51,994 - contexto_solver_app - INFO - Contexto Game initialized successfully for target 'trauma'. 85554 word similarities ranked.
+2025-05-06 09:48:51,994 - contexto_solver_app - INFO - New game started successfully. Target: trauma
+2025-05-06 09:48:52,825 - contexto_solver_app - INFO - Initializing Contexto Game with collection: glove.6B.100d
+2025-05-06 09:48:52,826 - contexto_solver_app - INFO - Selecting a random point from 'glove.6B.100d'...
+2025-05-06 09:48:52,833 - contexto_solver_app - INFO - Randomly selected point ID: 00011877-2895-5fc8-b26e-288d3e23ec91, Word: trauma
+2025-05-06 09:48:52,833 - contexto_solver_app - INFO - Target word selected: 'trauma' (ID: 00011877-2895-5fc8-b26e-288d3e23ec91)
+2025-05-06 09:48:52,950 - contexto_solver_app - INFO - Contexto Game initialized successfully for target 'trauma'. 85554 word similarities ranked.
+2025-05-06 09:48:52,950 - contexto_solver_app - INFO - New game started successfully. Target: trauma
+2025-05-06 09:48:53,553 - contexto_solver_app - INFO - Initializing Contexto Game with collection: glove.6B.100d
+2025-05-06 09:48:53,553 - contexto_solver_app - INFO - Selecting a random point from 'glove.6B.100d'...
+2025-05-06 09:48:53,560 - contexto_solver_app - INFO - Randomly selected point ID: 00011877-2895-5fc8-b26e-288d3e23ec91, Word: trauma
+2025-05-06 09:48:53,560 - contexto_solver_app - INFO - Target word selected: 'trauma' (ID: 00011877-2895-5fc8-b26e-288d3e23ec91)
+2025-05-06 09:48:53,663 - contexto_solver_app - INFO - Contexto Game initialized successfully for target 'trauma'. 85554 word similarities ranked.
+2025-05-06 09:48:53,664 - contexto_solver_app - INFO - New game started successfully. Target: trauma
+2025-05-06 09:48:54,345 - contexto_solver_app - INFO - Initializing Contexto Game with collection: glove.6B.100d
+2025-05-06 09:48:54,346 - contexto_solver_app - INFO - Selecting a random point from 'glove.6B.100d'...
+2025-05-06 09:48:54,351 - contexto_solver_app - INFO - Randomly selected point ID: 00011877-2895-5fc8-b26e-288d3e23ec91, Word: trauma
+2025-05-06 09:48:54,351 - contexto_solver_app - INFO - Target word selected: 'trauma' (ID: 00011877-2895-5fc8-b26e-288d3e23ec91)
+2025-05-06 09:48:54,467 - contexto_solver_app - INFO - Contexto Game initialized successfully for target 'trauma'. 85554 word similarities ranked.
+2025-05-06 09:48:54,467 - contexto_solver_app - INFO - New game started successfully. Target: trauma
+2025-05-06 09:50:32,703 - contexto_solver_app - INFO - Initializing Contexto Game with collection: glove.6B.100d
+2025-05-06 09:50:32,703 - contexto_solver_app - INFO - Attempting to connect to Qdrant...
+2025-05-06 09:50:32,771 - contexto_solver_app - INFO - Successfully connected to Qdrant at localhost:6334.
+2025-05-06 09:50:32,771 - contexto_solver_app - INFO - Fetching collection info for 'glove.6B.100d'...
+2025-05-06 09:50:32,774 - contexto_solver_app - INFO - Successfully fetched info for collection 'glove.6B.100d'.
+2025-05-06 09:50:32,774 - contexto_solver_app - INFO - Selecting a random point from 'glove.6B.100d'...
+2025-05-06 09:50:32,778 - contexto_solver_app - INFO - Randomly selected point ID: 00011877-2895-5fc8-b26e-288d3e23ec91, Word: trauma
+2025-05-06 09:50:32,778 - contexto_solver_app - INFO - Target word selected: 'trauma' (ID: 00011877-2895-5fc8-b26e-288d3e23ec91)
+2025-05-06 09:50:32,778 - contexto_solver_app - INFO - Computing similarities for all 85554 points in 'glove.6B.100d'...
+2025-05-06 09:50:34,749 - contexto_solver_app - INFO - Successfully computed and ranked similarities with vectors for 85554 words.
+2025-05-06 09:50:34,764 - contexto_solver_app - INFO - Contexto Game initialized successfully for target 'trauma'. 85554 word similarities ranked.
+2025-05-06 09:50:34,765 - contexto_solver_app - INFO - New game started successfully. Target: trauma
+2025-05-06 09:50:36,276 - contexto_solver_app - INFO - Initializing Contexto Game with collection: glove.6B.100d
+2025-05-06 09:50:36,276 - contexto_solver_app - INFO - Attempting to connect to Qdrant...
+2025-05-06 09:50:36,320 - contexto_solver_app - INFO - Successfully connected to Qdrant at localhost:6334.
+2025-05-06 09:50:36,321 - contexto_solver_app - INFO - Fetching collection info for 'glove.6B.100d'...
+2025-05-06 09:50:36,322 - contexto_solver_app - INFO - Successfully fetched info for collection 'glove.6B.100d'.
+2025-05-06 09:50:36,323 - contexto_solver_app - INFO - Selecting a random point from 'glove.6B.100d'...
+2025-05-06 09:50:36,326 - contexto_solver_app - INFO - Randomly selected point ID: 00011877-2895-5fc8-b26e-288d3e23ec91, Word: trauma
+2025-05-06 09:50:36,326 - contexto_solver_app - INFO - Target word selected: 'trauma' (ID: 00011877-2895-5fc8-b26e-288d3e23ec91)
+2025-05-06 09:50:36,326 - contexto_solver_app - INFO - Computing similarities for all 85554 points in 'glove.6B.100d'...
+2025-05-06 09:50:38,448 - contexto_solver_app - INFO - Successfully computed and ranked similarities with vectors for 85554 words.
+2025-05-06 09:50:38,463 - contexto_solver_app - INFO - Contexto Game initialized successfully for target 'trauma'. 85554 word similarities ranked.
+2025-05-06 09:50:38,464 - contexto_solver_app - INFO - New game started successfully. Target: trauma
+2025-05-06 09:57:05,427 - contexto_solver_app - INFO - Initializing Contexto Game with collection: glove.6B.100d
+2025-05-06 09:57:05,427 - contexto_solver_app - INFO - Attempting to connect to Qdrant...
+2025-05-06 09:57:05,492 - contexto_solver_app - INFO - Successfully connected to Qdrant at localhost:6334.
+2025-05-06 09:57:05,492 - contexto_solver_app - INFO - Fetching collection info for 'glove.6B.100d'...
+2025-05-06 09:57:05,495 - contexto_solver_app - INFO - Successfully fetched info for collection 'glove.6B.100d'.
+2025-05-06 09:57:05,495 - contexto_solver_app - INFO - Attempting to select a random point from 'glove.6B.100d' (reported total: 85554)...
+2025-05-06 09:57:05,495 - contexto_solver_app - INFO - Fetching all point IDs from 'glove.6B.100d' to select one randomly...
+2025-05-06 09:57:06,310 - contexto_solver_app - INFO - Fetched 85554 actual point IDs from 'glove.6B.100d'.
+2025-05-06 09:57:06,310 - contexto_solver_app - INFO - Randomly selected Point ID: e0e433ad-b9c2-5b8e-9a3d-05c36543ef3c
+2025-05-06 09:57:06,312 - contexto_solver_app - INFO - Successfully retrieved random point: ID e0e433ad-b9c2-5b8e-9a3d-05c36543ef3c, Word: 'espadrille'
+2025-05-06 09:57:06,312 - contexto_solver_app - INFO - Target word selected: 'espadrille' (ID: e0e433ad-b9c2-5b8e-9a3d-05c36543ef3c)
+2025-05-06 09:57:06,312 - contexto_solver_app - INFO - Computing similarities for all 85554 points in 'glove.6B.100d'...
+2025-05-06 09:57:08,322 - contexto_solver_app - INFO - Successfully computed and ranked similarities with vectors for 85554 words.
+2025-05-06 09:57:08,338 - contexto_solver_app - INFO - Contexto Game initialized successfully for target 'espadrille'. 85554 word similarities ranked.
+2025-05-06 09:57:08,338 - contexto_solver_app - INFO - New game started successfully. Target: espadrille
+2025-05-06 09:57:11,392 - contexto_solver_app - INFO - Initializing Contexto Game with collection: glove.6B.100d
+2025-05-06 09:57:11,392 - contexto_solver_app - INFO - Attempting to connect to Qdrant...
+2025-05-06 09:57:11,432 - contexto_solver_app - INFO - Successfully connected to Qdrant at localhost:6334.
+2025-05-06 09:57:11,432 - contexto_solver_app - INFO - Fetching collection info for 'glove.6B.100d'...
+2025-05-06 09:57:11,434 - contexto_solver_app - INFO - Successfully fetched info for collection 'glove.6B.100d'.
+2025-05-06 09:57:11,434 - contexto_solver_app - INFO - Attempting to select a random point from 'glove.6B.100d' (reported total: 85554)...
+2025-05-06 09:57:11,434 - contexto_solver_app - INFO - Fetching all point IDs from 'glove.6B.100d' to select one randomly...
+2025-05-06 09:57:12,173 - contexto_solver_app - INFO - Fetched 85554 actual point IDs from 'glove.6B.100d'.
+2025-05-06 09:57:12,173 - contexto_solver_app - INFO - Randomly selected Point ID: 0eff4c93-ebb4-5658-970e-c0570f09903e
+2025-05-06 09:57:12,174 - contexto_solver_app - INFO - Successfully retrieved random point: ID 0eff4c93-ebb4-5658-970e-c0570f09903e, Word: 'parsis'
+2025-05-06 09:57:12,175 - contexto_solver_app - INFO - Target word selected: 'parsis' (ID: 0eff4c93-ebb4-5658-970e-c0570f09903e)
+2025-05-06 09:57:12,175 - contexto_solver_app - INFO - Computing similarities for all 85554 points in 'glove.6B.100d'...
+2025-05-06 09:57:14,282 - contexto_solver_app - INFO - Successfully computed and ranked similarities with vectors for 85554 words.
+2025-05-06 09:57:14,299 - contexto_solver_app - INFO - Contexto Game initialized successfully for target 'parsis'. 85554 word similarities ranked.
+2025-05-06 09:57:14,299 - contexto_solver_app - INFO - New game started successfully. Target: parsis
+2025-05-06 09:57:16,981 - contexto_solver_app - INFO - Initializing Contexto Game with collection: glove.6B.100d
+2025-05-06 09:57:16,981 - contexto_solver_app - INFO - Attempting to connect to Qdrant...
+2025-05-06 09:57:17,009 - contexto_solver_app - INFO - Successfully connected to Qdrant at localhost:6334.
+2025-05-06 09:57:17,009 - contexto_solver_app - INFO - Fetching collection info for 'glove.6B.100d'...
+2025-05-06 09:57:17,012 - contexto_solver_app - INFO - Successfully fetched info for collection 'glove.6B.100d'.
+2025-05-06 09:57:17,012 - contexto_solver_app - INFO - Attempting to select a random point from 'glove.6B.100d' (reported total: 85554)...
+2025-05-06 09:57:17,012 - contexto_solver_app - INFO - Fetching all point IDs from 'glove.6B.100d' to select one randomly...
+2025-05-06 09:57:17,762 - contexto_solver_app - INFO - Fetched 85554 actual point IDs from 'glove.6B.100d'.
+2025-05-06 09:57:17,762 - contexto_solver_app - INFO - Randomly selected Point ID: 9722040e-6e7c-5bb7-8084-3152d88e6127
+2025-05-06 09:57:17,764 - contexto_solver_app - INFO - Successfully retrieved random point: ID 9722040e-6e7c-5bb7-8084-3152d88e6127, Word: 'colonists'
+2025-05-06 09:57:17,764 - contexto_solver_app - INFO - Target word selected: 'colonists' (ID: 9722040e-6e7c-5bb7-8084-3152d88e6127)
+2025-05-06 09:57:17,764 - contexto_solver_app - INFO - Computing similarities for all 85554 points in 'glove.6B.100d'...
+2025-05-06 09:57:19,874 - contexto_solver_app - INFO - Successfully computed and ranked similarities with vectors for 85554 words.
+2025-05-06 09:57:19,890 - contexto_solver_app - INFO - Contexto Game initialized successfully for target 'colonists'. 85554 word similarities ranked.
+2025-05-06 09:57:19,890 - contexto_solver_app - INFO - New game started successfully. Target: colonists
+2025-05-06 09:57:23,835 - contexto_solver_app - INFO - Guess added: 'ship' (Rank: 594)
+2025-05-06 09:57:28,464 - contexto_solver_app - INFO - Guess added: 'spanish' (Rank: 342)
+2025-05-06 09:57:31,949 - contexto_solver_app - INFO - Guess added: 'america' (Rank: 1329)
+2025-05-06 09:57:36,525 - contexto_solver_app - INFO - Invalid guess: 'new world' not found in similarity list.
+2025-05-06 09:57:38,214 - contexto_solver_app - INFO - Invalid guess: 'newworld' not found in similarity list.
+2025-05-06 09:57:43,214 - contexto_solver_app - INFO - Guess added: 'world' (Rank: 11581)
+2025-05-06 09:57:49,323 - contexto_solver_app - INFO - Guess added: 'conqueror' (Rank: 798)
+2025-05-06 09:57:54,713 - contexto_solver_app - INFO - Guess added: 'colony' (Rank: 18)
+2025-05-06 09:58:02,200 - contexto_solver_app - INFO - Guess added: 'colonist' (Rank: 94)
+2025-05-06 09:58:06,629 - contexto_solver_app - INFO - Guess added: 'colonists' (Rank: 1)
+2025-05-06 10:04:21,376 - contexto_solver_app - INFO - Initializing Contexto Game with collection: glove.6B.100d
+2025-05-06 10:04:21,376 - contexto_solver_app - INFO - Attempting to connect to Qdrant...
+2025-05-06 10:04:21,436 - contexto_solver_app - INFO - Successfully connected to Qdrant at localhost:6334.
+2025-05-06 10:04:21,436 - contexto_solver_app - INFO - Fetching collection info for 'glove.6B.100d'...
+2025-05-06 10:04:21,439 - contexto_solver_app - INFO - Successfully fetched info for collection 'glove.6B.100d'.
+2025-05-06 10:04:21,439 - contexto_solver_app - INFO - Attempting to select a random point from 'glove.6B.100d' (reported total: 85554)...
+2025-05-06 10:04:21,439 - contexto_solver_app - INFO - Fetching all point IDs from 'glove.6B.100d' to select one randomly...
+2025-05-06 10:04:22,213 - contexto_solver_app - INFO - Fetched 85554 actual point IDs from 'glove.6B.100d'.
+2025-05-06 10:04:22,213 - contexto_solver_app - INFO - Randomly selected Point ID: 83c6b3f0-e8d5-52f9-bff0-b48c27c02c5f
+2025-05-06 10:04:22,215 - contexto_solver_app - INFO - Successfully retrieved random point: ID 83c6b3f0-e8d5-52f9-bff0-b48c27c02c5f, Word: 'carriage'
+2025-05-06 10:04:22,216 - contexto_solver_app - INFO - Target word selected: 'carriage' (ID: 83c6b3f0-e8d5-52f9-bff0-b48c27c02c5f)
+2025-05-06 10:04:22,216 - contexto_solver_app - INFO - Computing similarities for all 85554 points in 'glove.6B.100d'...
+2025-05-06 10:04:24,234 - contexto_solver_app - INFO - Successfully computed and ranked similarities with vectors for 85554 words.
+2025-05-06 10:04:24,249 - contexto_solver_app - INFO - Contexto Game initialized successfully for target 'carriage'. 85554 word similarities ranked.
+2025-05-06 10:04:24,250 - contexto_solver_app - INFO - New game started successfully. Target: carriage
+2025-05-06 10:04:25,594 - contexto_solver_app - INFO - Guess added: 'car' (Rank: 24)
+2025-05-06 10:04:31,188 - contexto_solver_app - INFO - Guess added: 'carriage' (Rank: 1)
+2025-05-06 10:04:35,666 - contexto_solver_app - INFO - Initializing Contexto Game with collection: glove.6B.100d
+2025-05-06 10:04:35,667 - contexto_solver_app - INFO - Attempting to connect to Qdrant...
+2025-05-06 10:04:35,711 - contexto_solver_app - INFO - Successfully connected to Qdrant at localhost:6334.
+2025-05-06 10:04:35,711 - contexto_solver_app - INFO - Fetching collection info for 'glove.6B.100d'...
+2025-05-06 10:04:35,713 - contexto_solver_app - INFO - Successfully fetched info for collection 'glove.6B.100d'.
+2025-05-06 10:04:35,714 - contexto_solver_app - INFO - Attempting to select a random point from 'glove.6B.100d' (reported total: 85554)...
+2025-05-06 10:04:35,714 - contexto_solver_app - INFO - Fetching all point IDs from 'glove.6B.100d' to select one randomly...
+2025-05-06 10:04:36,547 - contexto_solver_app - INFO - Fetched 85554 actual point IDs from 'glove.6B.100d'.
+2025-05-06 10:04:36,547 - contexto_solver_app - INFO - Randomly selected Point ID: 274b3fce-8cad-5a63-82ff-3196c7a342a2
+2025-05-06 10:04:36,549 - contexto_solver_app - INFO - Successfully retrieved random point: ID 274b3fce-8cad-5a63-82ff-3196c7a342a2, Word: 'sipes'
+2025-05-06 10:04:36,549 - contexto_solver_app - INFO - Target word selected: 'sipes' (ID: 274b3fce-8cad-5a63-82ff-3196c7a342a2)
+2025-05-06 10:04:36,549 - contexto_solver_app - INFO - Computing similarities for all 85554 points in 'glove.6B.100d'...
+2025-05-06 10:04:38,647 - contexto_solver_app - INFO - Successfully computed and ranked similarities with vectors for 85554 words.
+2025-05-06 10:04:38,663 - contexto_solver_app - INFO - Contexto Game initialized successfully for target 'sipes'. 85554 word similarities ranked.
+2025-05-06 10:04:38,663 - contexto_solver_app - INFO - New game started successfully. Target: sipes
+2025-05-06 10:04:45,325 - contexto_solver_app - INFO - Guess added: 'sip' (Rank: 50888)
+2025-05-06 10:04:50,189 - contexto_solver_app - INFO - Guess added: 'glass' (Rank: 81413)
+2025-05-06 10:04:52,645 - contexto_solver_app - INFO - Guess added: 'car' (Rank: 80436)
+2025-05-06 10:04:55,547 - contexto_solver_app - INFO - Guess added: 'sipes' (Rank: 1)
+2025-05-06 10:04:58,329 - contexto_solver_app - INFO - Initializing Contexto Game with collection: glove.6B.100d
+2025-05-06 10:04:58,330 - contexto_solver_app - INFO - Attempting to connect to Qdrant...
+2025-05-06 10:04:58,371 - contexto_solver_app - INFO - Successfully connected to Qdrant at localhost:6334.
+2025-05-06 10:04:58,371 - contexto_solver_app - INFO - Fetching collection info for 'glove.6B.100d'...
+2025-05-06 10:04:58,373 - contexto_solver_app - INFO - Successfully fetched info for collection 'glove.6B.100d'.
+2025-05-06 10:04:58,373 - contexto_solver_app - INFO - Attempting to select a random point from 'glove.6B.100d' (reported total: 85554)...
+2025-05-06 10:04:58,373 - contexto_solver_app - INFO - Fetching all point IDs from 'glove.6B.100d' to select one randomly...
+2025-05-06 10:04:59,162 - contexto_solver_app - INFO - Fetched 85554 actual point IDs from 'glove.6B.100d'.
+2025-05-06 10:04:59,162 - contexto_solver_app - INFO - Randomly selected Point ID: 0c5a8f69-8712-57fd-8f70-842e4032ca1d
+2025-05-06 10:04:59,165 - contexto_solver_app - INFO - Successfully retrieved random point: ID 0c5a8f69-8712-57fd-8f70-842e4032ca1d, Word: 'megaton'
+2025-05-06 10:04:59,165 - contexto_solver_app - INFO - Target word selected: 'megaton' (ID: 0c5a8f69-8712-57fd-8f70-842e4032ca1d)
+2025-05-06 10:04:59,165 - contexto_solver_app - INFO - Computing similarities for all 85554 points in 'glove.6B.100d'...
+2025-05-06 10:05:01,272 - contexto_solver_app - INFO - Successfully computed and ranked similarities with vectors for 85554 words.
+2025-05-06 10:05:01,289 - contexto_solver_app - INFO - Contexto Game initialized successfully for target 'megaton'. 85554 word similarities ranked.
+2025-05-06 10:05:01,289 - contexto_solver_app - INFO - New game started successfully. Target: megaton

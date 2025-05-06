@@ -16,4 +16,6 @@ dependencies = [
     "streamlit>=1.30.0", # Add streamlit
     "pandas>=2.0.0", # Add pandas
     "polars>=1.29.0",
+    "nltk>=3.9.1",
+    "watchdog>=6.0.0",
 ]

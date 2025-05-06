@@ -1,10 +1,12 @@
 import itertools
 import os
+import uuid
 import zipfile
 from pathlib import Path
 from typing import Optional, Tuple
 
 import grpc
+import nltk
 import requests
 import typer
 from qdrant_client import QdrantClient, models
@@ -19,8 +21,14 @@ from rich.progress import (
     TransferSpeedColumn,
 )
 
+try:
+    nltk.data.find("corpora/wordnet")
+except LookupError:
+    nltk.download("wordnet")
+from nltk.corpus import wordnet
+
 from config.logger import app_logger as logger
-from config.settings import Settings, settings  # Import Settings class
+from config.settings import Settings, settings
 
 # --- Constants ---
 DATA_DIR = Path(".data")
@@ -38,12 +46,9 @@ DIMENSIONS = {
     "300d": 300,
     "25d": 25,
 }
-
-# --- Typer App ---
 app = typer.Typer()
 
 
-# --- Functions ---
 def get_glove_url_and_filename(dataset_name: str) -> Tuple[str, str]:
     """Determines the download URL and expected filename for a given GloVe dataset.
 
@@ -187,7 +192,8 @@ def download_and_extract_glove(
 def setup_qdrant_collection(
     client: QdrantClient, collection_name: str, vector_size: int
 ) -> None:
-    """Checks if a Qdrant collection exists and creates it if it doesn't.
+    """Checks if a Qdrant collection exists. If it does, it's deleted and recreated.
+    Then, creates it if it doesn't exist.
 
     Args:
         client (QdrantClient): An initialized QdrantClient instance.
@@ -198,13 +204,23 @@ def setup_qdrant_collection(
         None.
 
     Raises:
-        Exception: If creating the collection fails after it was determined
-            not to exist.
+        Exception: If creating the collection fails.
     """
     try:
         # 1. Check if collection exists
         client.get_collection(collection_name=collection_name)
-        logger.info(f"Collection '{collection_name}' already exists.")
+        logger.info(
+            f"Collection '{collection_name}' already exists. Deleting and recreating."
+        )
+        # Delete existing collection
+        client.delete_collection(collection_name=collection_name)
+        # Recreate the collection
+        client.create_collection(
+            collection_name=collection_name,
+            vectors_config=VectorParams(size=vector_size, distance=Distance.COSINE),
+        )
+        logger.info(f"Collection '{collection_name}' recreated successfully.")
+
     except Exception as e:
         # 2. Check if the error is specifically 'Not Found'
         is_not_found_error = False
@@ -245,7 +261,8 @@ def upsert_embeddings(
     """Loads word embeddings from a file and upserts them into a Qdrant collection.
 
     Reads the embeddings file in batches of lines, creates PointStruct objects,
-    and upserts them into the specified Qdrant collection.
+    and upserts them into the specified Qdrant collection. Only valid English
+    words are added.
 
     Args:
         client (QdrantClient): An initialized QdrantClient instance.
@@ -300,14 +317,26 @@ def upsert_embeddings(
                         global_line_index += 1
                         continue
 
-                    word = values[0]
+                    word_from_file = values[0]
                     try:
+                        # Check if the word is a valid English word
+                        if not wordnet.synsets(word_from_file):
+                            logger.debug(
+                                f"Skipping non-English word {global_line_index + 1}: {word_from_file}"
+                            )
+                            skipped_lines += 1
+                            global_line_index += 1
+                            continue
+
                         vector = [float(val) for val in values[1:]]
+                        point_id = str(
+                            uuid.uuid5(settings.qdrant_uuid_namespace, word_from_file)
+                        )
                         points_to_upsert.append(
                             models.PointStruct(
-                                id=global_line_index,  # Use global index for ID
+                                id=point_id,
                                 vector=vector,
-                                payload={"word": word},
+                                payload={"word": word_from_file},
                             )
                         )
                     except ValueError:
@@ -316,9 +345,7 @@ def upsert_embeddings(
                         )
                         skipped_lines += 1
 
-                    global_line_index += (
-                        1  # Increment global index regardless of success/skip
-                    )
+                    global_line_index += 1
 
                 # 3c. If no lines were processed in this batch, we're done
                 if lines_processed_in_this_batch == 0:
@@ -337,8 +364,6 @@ def upsert_embeddings(
                         logger.error(
                             f"Error during batch upsert near line {global_line_index}: {upsert_err}"
                         )
-                        # Decide how to handle batch upsert errors (e.g., log, skip batch, stop)
-                        # Currently logging and continuing
 
                 # 3e. Update the progress bar (advance still works)
                 progress.update(upsert_task, advance=lines_processed_in_this_batch)
@@ -380,7 +405,6 @@ def main(
     try:
         if (
             dataset_name
-            # Use Settings class instead of instance to access model_fields
             not in Settings.model_fields["glove_dataset"].annotation.__args__
         ):
             raise ValueError(f"Invalid dataset choice: {dataset_name}")
