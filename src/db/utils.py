@@ -1,6 +1,5 @@
 # Database utility functions
 
-import random
 from typing import Dict, List, Optional, Set, Tuple
 
 import numpy as np
@@ -71,82 +70,56 @@ def get_collection_info(
 def get_random_point(
     _client: QdrantClient, collection_name: str, total_points: int
 ) -> Optional[Record]:
-    """Fetches a single random point (word and vector) from the collection.
+    """Fetches a single random point (word and vector) from the collection using random sampling.
 
     Args:
         _client (QdrantClient): An initialized QdrantClient instance.
         collection_name (str): The name of the collection.
-        total_points (int): The total number of points in the collection.
-                           Assured by caller to be > 0.
+        total_points (int): The total number of points in the collection (used for logging).
 
     Returns:
         Optional[Record]: A Qdrant Record object containing the random point's data,
-                          or None if an error occurs (e.g., collection becomes empty unexpectedly).
+                          or None if an error occurs or no point is returned.
     """
     logger.info(
-        f"Attempting to select a random point from '{collection_name}' (reported total: "
+        f"Attempting to select a random point from '{collection_name}' using random sampling (reported total: "
         f"{total_points})..."
     )
     try:
-        logger.info(
-            f"Fetching all point IDs from '{collection_name}' to select one randomly..."
-        )
-        all_ids: List[models.PointId] = []
-        current_scroll_offset: Optional[models.PointId] = None
-
-        while True:
-            page_records, next_page_scroll_offset = _client.scroll(
-                collection_name=collection_name,
-                limit=256,
-                offset=current_scroll_offset,
-                with_payload=False,
-                with_vectors=False,
-            )
-            if not page_records:
-                break
-
-            all_ids.extend([record.id for record in page_records])
-
-            if next_page_scroll_offset is None:
-                break
-            current_scroll_offset = next_page_scroll_offset
-
-        logger.info(
-            f"Fetched {len(all_ids)} actual point IDs from '{collection_name}'."
-        )
-
-        if not all_ids:
-            logger.error(
-                f"No IDs found in collection '{collection_name}'. Cannot select a random point."
-            )
-            return None
-
-        random_id: models.PointId = random.choice(all_ids)
-        logger.info(f"Randomly selected Point ID: {random_id}")
-
-        # Retrieve the full data for the selected point ID
-        retrieved_points = _client.retrieve(
+        query_responses = _client.query_points(
             collection_name=collection_name,
-            ids=[random_id],
+            query=models.SampleQuery(sample=models.Sample.RANDOM),
+            limit=1,  # We need only one random point
             with_payload=True,
             with_vectors=True,
         )
 
-        if retrieved_points:
-            target_point = retrieved_points[0]
-            actual_word = target_point.payload["word"]
-            logger.info(
-                f"Successfully retrieved random point: ID {target_point.id}, Word: "
-                f"'{actual_word}'"
-            )
-            return target_point
+        if query_responses and query_responses.points:
+            random_scored_point = query_responses.points[0]
+
+            # Ensure payload and word exist, similar to previous checks
+            if random_scored_point.payload and "word" in random_scored_point.payload:
+                actual_word = random_scored_point.payload["word"]
+                logger.info(
+                    f"Successfully retrieved random point using sampling: ID {random_scored_point.id}, Word: "
+                    f"'{actual_word}'"
+                )
+                return random_scored_point
+            else:
+                logger.error(
+                    f"Random sampling returned a point (ID: {random_scored_point.id}) but it's missing payload or 'word'."
+                )
+                return None
         else:
-            logger.error(f"Failed to retrieve point data for selected ID {random_id}.")
+            logger.error(
+                f"Random sampling did not return any points from collection '{collection_name}'."
+            )
             return None
 
     except Exception as e:
         logger.error(
-            f"Error selecting random point from '{collection_name}': {e}", exc_info=True
+            f"Error selecting random point using sampling from '{collection_name}': {e}",
+            exc_info=True,
         )
         return None
 
@@ -255,138 +228,6 @@ def get_vector_for_word(
             exc_info=True,
         )
     return None
-
-
-def cosine_similarity(vec1: np.ndarray, vec2: np.ndarray) -> float:
-    """Computes the cosine similarity between two numpy vectors.
-
-    Cosine similarity measures the cosine of the angle between two non-zero
-    vectors. It is a measure of similarity between two sequences of numbers.
-    A cosine value of 0 means that the two vectors are at 90 degrees to each
-    other (orthogonal) and have no similarity. A cosine value of 1 means that
-    the two vectors have the same orientation.
-
-    Args:
-        vec1: The first numpy array (vector).
-        vec2: The second numpy array (vector).
-
-    Returns:
-        The cosine similarity as a float between -1 and 1 (inclusive).
-        Returns 0.0 if either vector has a norm of 0 to avoid division by zero.
-
-    Raises:
-        TypeError: If either input is not a numpy array.
-        ValueError: If the input vectors do not have the same shape.
-    """
-    if not isinstance(vec1, np.ndarray) or not isinstance(vec2, np.ndarray):
-        raise TypeError("Inputs must be numpy arrays.")
-    if vec1.shape != vec2.shape:
-        raise ValueError("Input vectors must have the same shape.")
-
-    norm_vec1 = np.linalg.norm(vec1)
-    norm_vec2 = np.linalg.norm(vec2)
-
-    if norm_vec1 == 0 or norm_vec2 == 0:
-        # Cosine similarity is undefined if one or both vectors are zero vectors.
-        # Depending on the context, you might return 0, -1, or raise an error.
-        # Returning 0 for now, assuming non-negative similarities are expected elsewhere.
-        return 0.0
-
-    similarity = np.dot(vec1, vec2) / (norm_vec1 * norm_vec2)
-    return float(similarity)
-
-
-def get_ranks_for_word(
-    client: QdrantClient,
-    collection_name: str,
-    query_vector: np.ndarray,
-    candidate_words: List[str],
-) -> Dict[str, int]:
-    """
-    For a given query_vector, get its similarity rank compared to a list of candidate_words.
-    Rank is 0-indexed (0 is most similar/identical).
-    This function queries Qdrant using a single search call filtered by candidate words.
-
-    Args:
-        client (QdrantClient): An initialized QdrantClient instance.
-        collection_name (str): The name of the Qdrant collection.
-        query_vector (np.ndarray): The vector for which to find similarities.
-        candidate_words (List[str]): A list of words to rank against the query_vector.
-
-    Returns:
-        Dict[str, int]: A dictionary mapping each candidate word (that was found and ranked)
-                        to its 0-indexed rank relative to the query_vector.
-                        Lower rank means more similar. Words not found or errors might be excluded.
-    """
-    if not candidate_words:
-        return {}
-
-    logger.debug(
-        f"get_ranks_for_word: Ranking {len(candidate_words)} candidates against query vector "
-        f"in collection '{collection_name}'."
-    )
-    word_to_rank: Dict[str, int] = {}
-
-    # Qdrant's search returns scored points. We need to convert these scores to ranks.
-    # The most straightforward way is to search for the query_vector against ALL words
-    # in the candidate_words list and then determine the rank from the order of results.
-
-    # We will perform a single search request with the query_vector,
-    # but we need to ensure Qdrant only considers points from our candidate_words list.
-    # This can be done using a filter for the 'word' payload.
-
-    if not candidate_words:
-        return {}
-
-    # Create a filter to only search within the candidate words
-    # Qdrant expects a list of values for MatchAny
-    scroll_filter = rest_models.Filter(
-        must=[
-            rest_models.FieldCondition(
-                key="word",
-                match=rest_models.MatchAny(any=candidate_words),
-            )
-        ]
-    )
-
-    try:
-        # Search for the query_vector, filtered by candidate_words, limit to number of candidates
-        # as we want all of them ranked.
-        hits = client.search(
-            collection_name=collection_name,
-            query_vector=query_vector.tolist(),
-            query_filter=scroll_filter,
-            limit=len(candidate_words),  # Get all candidate words ranked
-            with_payload=True,  # Need payload for "word"
-            with_vectors=False,  # No need for vectors
-        )
-
-        # The 'hits' are already sorted by similarity by Qdrant (highest score first)
-        # So, the order in 'hits' gives us the rank.
-        for rank, hit in enumerate(hits):
-            if hit.payload and "word" in hit.payload:
-                hit_word = hit.payload["word"].lower()
-                # We only care about words that were in our original candidate_words list
-                if hit_word in candidate_words:
-                    word_to_rank[hit_word] = rank  # 0-indexed rank
-            else:
-                logger.debug(
-                    f"get_ranks_for_word: Skipping hit with ID {hit.id} due to missing 'word' in payload."
-                )
-
-        logger.debug(
-            f"get_ranks_for_word: Successfully ranked {len(word_to_rank)} out of {len(candidate_words)} candidates."
-        )
-
-    except Exception as e:
-        logger.error(
-            f"get_ranks_for_word: Error during Qdrant search for ranking: {e}",
-            exc_info=True,
-        )
-        # Return whatever was processed so far, or an empty dict if total failure
-        return word_to_rank
-
-    return word_to_rank
 
 
 def find_closest_word_to_point(

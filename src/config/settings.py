@@ -24,6 +24,7 @@ class Settings(BaseSettings):
         qdrant_uuid_namespace: Namespace for generating Qdrant point UUIDs.
         glove_dataset: Specifies the GloVe dataset to use for word embeddings.
         base_step_scale: Base step scale for the solver's random step fallback mechanism.
+        qdrant_hnsw_ef: The 'ef' (size of the dynamic list for HNSW) parameter for Qdrant search.
     """
 
     qdrant_host: str = Field(
@@ -79,6 +80,10 @@ class Settings(BaseSettings):
     base_step_scale: float = Field(
         default=0.05,
         description="Base step scale for the solver's random step fallback mechanism.",
+    )
+    qdrant_hnsw_ef: int = Field(
+        default=128,
+        description="The 'ef' (size of the dynamic list for HNSW) parameter for Qdrant search. Affects search speed and accuracy.",
     )
 
     class Config:
