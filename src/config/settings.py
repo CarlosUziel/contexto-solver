@@ -6,11 +6,30 @@ from pydantic_settings import BaseSettings
 
 
 class Settings(BaseSettings):
+    """
+    Application settings, configurable via environment variables or a .env file.
+
+    These settings are automatically loaded by Pydantic from environment variables
+    (matching the attribute names, case-insensitive) or from a `.env` file
+    located in the project's root directory.
+
+    Attributes:
+        qdrant_host: Hostname or IP address of the Qdrant server.
+        qdrant_grpc_host_port: gRPC port exposed by the Qdrant host for client connections.
+        qdrant_http_host_port: HTTP port exposed by the Qdrant host.
+        qdrant_grpc_container_port: Internal gRPC port used by the Qdrant container.
+        qdrant_http_container_port: Internal HTTP port used by the Qdrant container.
+        qdrant_api_key: API key for Qdrant Cloud (optional).
+        qdrant_log_level: Logging level for the Qdrant service.
+        qdrant_uuid_namespace: Namespace for generating Qdrant point UUIDs.
+        glove_dataset: Specifies the GloVe dataset to use for word embeddings.
+        base_step_scale: Base step scale for the solver's random step fallback mechanism.
+    """
+
     qdrant_host: str = Field(
         default="localhost",
         description="Hostname or IP address of the Qdrant server.",
     )
-    # Renamed qdrant_port to reflect it's the host gRPC port for client connection
     qdrant_grpc_host_port: int = Field(
         default=6333,
         description="gRPC port exposed by the Qdrant host for client connections.",
@@ -19,7 +38,6 @@ class Settings(BaseSettings):
         default=6334,
         description="HTTP port exposed by the Qdrant host.",
     )
-    # Added container ports for completeness, though not directly used by setup script
     qdrant_grpc_container_port: int = Field(
         default=6333,
         description="Internal gRPC port used by the Qdrant container.",
@@ -39,7 +57,6 @@ class Settings(BaseSettings):
             "(e.g., 'debug', 'info', 'warning', 'error')."
         ),
     )
-    # Define a namespace for UUID generation (can be any valid UUID)
     qdrant_uuid_namespace: uuid.UUID = Field(
         default=uuid.NAMESPACE_DNS,
         description="Namespace for generating Qdrant point UUIDs.",
@@ -60,7 +77,8 @@ class Settings(BaseSettings):
         description="Specifies the GloVe dataset to use for word embeddings.",
     )
     base_step_scale: float = Field(
-        default=0.05, description="Base step scale for multiple guesses."
+        default=0.05,
+        description="Base step scale for the solver's random step fallback mechanism.",
     )
 
     class Config:

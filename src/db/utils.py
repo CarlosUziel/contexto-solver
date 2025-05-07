@@ -258,7 +258,26 @@ def get_vector_for_word(
 
 
 def cosine_similarity(vec1: np.ndarray, vec2: np.ndarray) -> float:
-    """Computes the cosine similarity between two numpy vectors."""
+    """Computes the cosine similarity between two numpy vectors.
+
+    Cosine similarity measures the cosine of the angle between two non-zero
+    vectors. It is a measure of similarity between two sequences of numbers.
+    A cosine value of 0 means that the two vectors are at 90 degrees to each
+    other (orthogonal) and have no similarity. A cosine value of 1 means that
+    the two vectors have the same orientation.
+
+    Args:
+        vec1: The first numpy array (vector).
+        vec2: The second numpy array (vector).
+
+    Returns:
+        The cosine similarity as a float between -1 and 1 (inclusive).
+        Returns 0.0 if either vector has a norm of 0 to avoid division by zero.
+
+    Raises:
+        TypeError: If either input is not a numpy array.
+        ValueError: If the input vectors do not have the same shape.
+    """
     if not isinstance(vec1, np.ndarray) or not isinstance(vec2, np.ndarray):
         raise TypeError("Inputs must be numpy arrays.")
     if vec1.shape != vec2.shape:
@@ -277,175 +296,22 @@ def cosine_similarity(vec1: np.ndarray, vec2: np.ndarray) -> float:
     return float(similarity)
 
 
-def get_all_words_with_vectors(
-    client: QdrantClient, collection_name: str
-) -> Dict[str, np.ndarray]:
-    """
-    Retrieves all words and their corresponding vectors from the Qdrant collection.
-
-    Args:
-        client (QdrantClient): An initialized QdrantClient instance.
-        collection_name (str): The name of the Qdrant collection.
-
-    Returns:
-        Dict[str, np.ndarray]: A dictionary mapping each word (lowercase) to its vector.
-                               Returns an empty dictionary if an error occurs or no words are found.
-    """
-    all_words_vectors: Dict[str, np.ndarray] = {}
-    logger.info(
-        f"Attempting to retrieve all words and vectors from collection '{collection_name}'."
-    )
-    try:
-        next_page_offset = None
-        processed_count = 0
-        while True:
-            points, next_page_offset = client.scroll(
-                collection_name=collection_name,
-                limit=250,  # Adjust batch size as needed
-                offset=next_page_offset,
-                with_payload=True,  # Need payload for "word"
-                with_vectors=True,
-            )
-            if not points:
-                break  # No more points to fetch
-
-            for point in points:
-                if (
-                    point.payload
-                    and "word" in point.payload
-                    and isinstance(point.payload["word"], str)
-                    and point.vector is not None
-                ):
-                    word = point.payload["word"].lower()
-                    all_words_vectors[word] = np.array(point.vector, dtype=np.float32)
-                    processed_count += 1
-                else:
-                    logger.warning(
-                        f"Skipping point with id {point.id} due to missing 'word' in payload or missing vector."
-                    )
-
-            logger.debug(
-                f"Scrolled {len(points)} points. Total processed so far: {processed_count}"
-            )
-
-            if next_page_offset is None:
-                break  # All points have been fetched
-
-        logger.info(
-            f"Successfully retrieved {len(all_words_vectors)} words and vectors from '{collection_name}'."
-        )
-        return all_words_vectors
-    except Exception as e:
-        logger.error(
-            f"Error retrieving all words and vectors from '{collection_name}': {e}",
-            exc_info=True,
-        )
-        return {}
-
-
-def compute_qdrant_similarity_matrix(
-    client: QdrantClient,
-    collection_name: str,
-    words_list: List[str],
-    word_to_idx_map: Dict[str, int],
-    all_word_vectors: Dict[str, np.ndarray],
-) -> np.ndarray:
-    """
-    Computes the full N x N similarity matrix using Qdrant search for each word.
-
-    Args:
-        client (QdrantClient): An initialized QdrantClient instance.
-        collection_name (str): The name of the Qdrant collection.
-        words_list (List[str]): Ordered list of words. The matrix dimensions will be based on this list.
-        word_to_idx_map (Dict[str, int]): Mapping from word string to its index in words_list.
-        all_word_vectors (Dict[str, np.ndarray]): Dictionary mapping words to their vector representations.
-
-    Returns:
-        np.ndarray: An N x N NumPy array where N is the number of words in words_list.
-                    matrix[i, j] is the similarity between words_list[i] and words_list[j].
-                    Returns an empty array if words_list is empty.
-    """
-    N = len(words_list)
-    if N == 0:
-        logger.warning("compute_qdrant_similarity_matrix called with empty words_list.")
-        return np.array([], dtype=np.float32)
-
-    logger.info(
-        f"Computing {N}x{N} similarity matrix for collection '{collection_name}' via Qdrant..."
-    )
-    similarity_matrix = np.zeros((N, N), dtype=np.float32)
-
-    for i, query_word in enumerate(words_list):
-        if query_word not in all_word_vectors:
-            logger.warning(
-                f"Word '{query_word}' (index {i}) not found in all_word_vectors. Skipping its row in similarity matrix."
-            )
-            continue  # Or fill with a default value like np.nan or -1, or raise error
-
-        query_vector = all_word_vectors[query_word]
-
-        try:
-            # Search for the most similar N points to the query_vector
-            hits = client.search(
-                collection_name=collection_name,
-                query_vector=query_vector.tolist(),
-                limit=N,  # Get all other points for similarity
-                with_payload=True,  # Need payload for "word"
-                with_vectors=False,  # No need to return vectors themselves
-            )
-
-            for hit in hits:
-                if hit.payload and "word" in hit.payload:
-                    hit_word = hit.payload["word"].lower()
-                    if hit_word in word_to_idx_map:
-                        j = word_to_idx_map[hit_word]
-                        similarity_matrix[i, j] = hit.score
-                    else:
-                        logger.debug(
-                            f"Word '{hit_word}' from Qdrant search result not in provided word_to_idx_map. Skipping."
-                        )
-                else:
-                    logger.debug(
-                        f"Skipping hit for query_word '{query_word}' due to missing 'word' in payload: {hit.id}"
-                    )
-
-            # Ensure self-similarity is 1.0, Qdrant cosine similarity should be 1 for identical vectors.
-            # If the collection uses a different metric, this might need adjustment.
-            if (
-                similarity_matrix[i, i] == 0 and query_word in word_to_idx_map
-            ):  # if it wasn't set by a hit (e.g. if limit < N or word missing)
-                similarity_matrix[i, i] = 1.0
-
-        except Exception as e:
-            logger.error(
-                f"Error during Qdrant search for word '{query_word}' (index {i}): {e}",
-                exc_info=True,
-            )
-            # Optionally, fill the row with a specific value like np.nan or continue
-            # For now, it will remain zeros if an error occurs for a word.
-
-    logger.info(f"Successfully computed {N}x{N} similarity matrix via Qdrant.")
-    return similarity_matrix
-
-
 def get_ranks_for_word(
     client: QdrantClient,
     collection_name: str,
     query_vector: np.ndarray,
     candidate_words: List[str],
-    batch_size: int = 32,  # Batch size for Qdrant search_batch
 ) -> Dict[str, int]:
     """
     For a given query_vector, get its similarity rank compared to a list of candidate_words.
     Rank is 0-indexed (0 is most similar/identical).
-    This function queries Qdrant using search_batch for efficiency.
+    This function queries Qdrant using a single search call filtered by candidate words.
 
     Args:
         client (QdrantClient): An initialized QdrantClient instance.
         collection_name (str): The name of the Qdrant collection.
         query_vector (np.ndarray): The vector for which to find similarities.
         candidate_words (List[str]): A list of words to rank against the query_vector.
-        batch_size (int): Number of search requests to batch together for Qdrant.
 
     Returns:
         Dict[str, int]: A dictionary mapping each candidate word (that was found and ranked)

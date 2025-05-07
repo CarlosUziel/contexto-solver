@@ -145,12 +145,15 @@ class ContextoSolver:
 
                 if rank < prev_positive_rank:
                     pair_positive_embedding = embedding
-                    pair_negative_embedding = prev_positive_embedding 
+                    pair_negative_embedding = prev_positive_embedding
                     self.current_positive_point_details = new_guess_details
                     # Check for duplicates using np.array_equal
-                    is_duplicate = any(np.array_equal(embedding, e) for e in self.positive_embeddings_for_centroid)
+                    is_duplicate = any(
+                        np.array_equal(embedding, e)
+                        for e in self.positive_embeddings_for_centroid
+                    )
                     if not is_duplicate:
-                         self.positive_embeddings_for_centroid.append(embedding)
+                        self.positive_embeddings_for_centroid.append(embedding)
                     self.current_negative_reference_embedding = prev_positive_embedding
                 else:  # New guess is not better than current positive
                     pair_positive_embedding = prev_positive_embedding
