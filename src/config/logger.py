@@ -1,5 +1,6 @@
 import logging
 import sys
+import os  # Added import
 
 
 def setup_logger(name: str = __name__, level: int = logging.INFO) -> logging.Logger:
@@ -33,8 +34,15 @@ def setup_logger(name: str = __name__, level: int = logging.INFO) -> logging.Log
         logger.addHandler(ch)
 
         # File Handler
+        # Ensure the .logs directory exists
+        log_dir = ".logs"
+        log_file_name = "app.log"
+        log_file_path = os.path.join(log_dir, log_file_name)
+
         try:
-            fh = logging.FileHandler("app.log")
+            if not os.path.exists(log_dir):
+                os.makedirs(log_dir)
+            fh = logging.FileHandler(log_file_path)  # Changed to use .logs/app.log
             fh.setLevel(level)
             fh.setFormatter(formatter)
             logger.addHandler(fh)
