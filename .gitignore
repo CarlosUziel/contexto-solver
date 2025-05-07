@@ -7,3 +7,8 @@ qdrant_storage/
 # Python cache
 __pycache__/
 *.py[co]
+
+.venv
+.vscode
+.qdrant_storage
+.ruff_cache
