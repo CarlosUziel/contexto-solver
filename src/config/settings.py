@@ -56,7 +56,7 @@ class Settings(BaseSettings):
         "glove.42B.300d",
         "glove.840B.300d",
     ] = Field(
-        default="glove.6B.100d",
+        default="glove.6B.300d",
         description="Specifies the GloVe dataset to use for word embeddings.",
     )
     base_step_scale: float = Field(
@@ -66,6 +66,7 @@ class Settings(BaseSettings):
     class Config:
         env_file = ".env"
         env_file_encoding = "utf-8"
+        extra = "ignore"  # Add this line to ignore extra fields
 
 
 settings = Settings()
