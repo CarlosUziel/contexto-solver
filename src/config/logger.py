@@ -5,9 +5,14 @@ import sys
 def setup_logger(name: str = __name__, level: int = logging.INFO) -> logging.Logger:
     """Sets up and returns a configured logger instance.
 
+    The logger will output to both the console and a file named 'app.log'.
+    It avoids adding multiple handlers if the logger instance has already
+    been configured.
+
     Args:
-        name: The name for the logger.
+        name: The name for the logger. Defaults to the module name.
         level: The logging level (e.g., logging.INFO, logging.DEBUG).
+               Defaults to logging.INFO.
 
     Returns:
         A configured logging.Logger instance.
@@ -34,7 +39,11 @@ def setup_logger(name: str = __name__, level: int = logging.INFO) -> logging.Log
             fh.setFormatter(formatter)
             logger.addHandler(fh)
         except Exception as e:
-            logger.error(f"Failed to set up file handler: {e}", exc_info=True)
+            # Log to stderr if file handler setup fails, as logger might not be fully set up.
+            print(
+                f"Failed to set up file handler for logger '{name}': {e}",
+                file=sys.stderr,
+            )
 
     # Prevent log messages from propagating to the root logger
     logger.propagate = False
