@@ -229,6 +229,12 @@ This codebase is linted and formatted using [Ruff](https://github.com/astral-sh/
 ruff check . --fix && ruff format . && ruff check --fix --select I
 ```
 
+To enable pre-commit hooks, run the following command within the project directory and the *uv* environment:
+
+```bash
+pre-commit install
+```
+
 <p align="right">(<a href="#top">back to top</a>)</p>
 
 <!-- CONTACT -->
