@@ -25,6 +25,7 @@ class Settings(BaseSettings):
         glove_dataset: Specifies the GloVe dataset to use for word embeddings.
         base_step_scale: Base step scale for the solver's random step fallback mechanism.
         qdrant_hnsw_ef: The 'ef' (size of the dynamic list for HNSW) parameter for Qdrant search.
+        max_distant_embedding_attempts: Maximum attempts to find a distant embedding for context pair generation.
     """
 
     qdrant_host: str = Field(
@@ -82,8 +83,12 @@ class Settings(BaseSettings):
         description="Base step scale for the solver's random step fallback mechanism.",
     )
     qdrant_hnsw_ef: int = Field(
-        default=128,
+        default=64,
         description="The 'ef' (size of the dynamic list for HNSW) parameter for Qdrant search. Affects search speed and accuracy.",
+    )
+    max_distant_embedding_attempts: int = Field(
+        default=5,
+        description="Maximum attempts to find a distant embedding for context pair generation.",
     )
 
     class Config:

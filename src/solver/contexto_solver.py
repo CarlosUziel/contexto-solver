@@ -84,12 +84,11 @@ class ContextoSolver:
             return False
 
         embedding = get_vector_for_word(self.client, self.collection_name, word)
-        if not ContextoSolver._is_valid_embedding(embedding):
+        if embedding is None:  # Check if embedding is None directly
             logger.warning(
                 f"Could not retrieve a valid embedding for word '{word}'. Guess not added, context not updated."
             )
             return False
-        assert embedding is not None  # For type hinting and static analysis
 
         pair_positive_embedding: Optional[np.ndarray] = None
         pair_negative_embedding: Optional[np.ndarray] = None
@@ -254,8 +253,6 @@ class ContextoSolver:
             Tuple of (positive_embedding, negative_embedding) for context pair formation
         """
         new_guess_details = (word, rank, embedding)
-        pair_positive_embedding: np.ndarray
-        pair_negative_embedding: np.ndarray
 
         if self.current_positive_point_details is None:
             logger.error(
@@ -269,7 +266,7 @@ class ContextoSolver:
             self.current_negative_reference_embedding = pair_negative_embedding
             return pair_positive_embedding, pair_negative_embedding
 
-        _prev_positive_word, prev_positive_rank, prev_positive_embedding = (
+        _, prev_positive_rank, prev_positive_embedding = (
             self.current_positive_point_details
         )
 
@@ -361,10 +358,9 @@ class ContextoSolver:
         def get_best_guess_embedding_list() -> Optional[List[float]]:
             if self.past_guesses:
                 embedding = self.past_guesses[0][2]
-                if ContextoSolver._is_valid_embedding(embedding):
-                    assert embedding is not None  # for type checker
-                    logger.info("Using best guess embedding as target/fallback.")
-                    return embedding.tolist()
+                assert embedding is not None  # for type checker
+                logger.info("Using best guess embedding as target/fallback.")
+                return embedding.tolist()
             logger.warning(
                 "No valid past guesses available to use as target/fallback for target vector."
             )
@@ -375,30 +371,17 @@ class ContextoSolver:
                 f"Calculating centroid from {len(self.positive_embeddings_for_centroid)} positive embeddings."
             )
 
-            valid_embeddings = [
-                emb
-                for emb in self.positive_embeddings_for_centroid
-                if ContextoSolver._is_valid_embedding(emb)
-            ]
-
-            if not valid_embeddings:
-                logger.warning(
-                    "No valid embeddings in positive_embeddings_for_centroid. Falling back."
-                )
-            else:
-                centroid_vector = np.mean(np.array(valid_embeddings), axis=0)
-                if ContextoSolver._is_valid_embedding(centroid_vector):
-                    assert centroid_vector is not None  # for type checker
-                    logger.info(
-                        "Using centroid of positive embeddings as target for discovery."
-                    )
-                    return centroid_vector.tolist()
-                else:
-                    logger.warning("Computed centroid is invalid. Falling back.")
-        else:
-            logger.warning(
-                "No positive embeddings for centroid. Attempting fallback to best guess."
+            centroid_vector = np.mean(
+                np.array(self.positive_embeddings_for_centroid), axis=0
             )
+            logger.info(
+                "Using centroid of positive embeddings as target for discovery."
+            )
+            return centroid_vector.tolist()
+
+        logger.warning(
+            "No positive embeddings for centroid. Attempting fallback to best guess."
+        )
 
         return get_best_guess_embedding_list()
 
@@ -501,10 +484,7 @@ class ContextoSolver:
             f"StepFromBestGuess: Attempting from best guess '{best_guess_word}'."
         )
 
-        if not ContextoSolver._is_valid_embedding(best_guess_embedding):
-            raise SolverUnableToGuessError(
-                f"StepFromBestGuess: Best guess '{best_guess_word}' has an invalid embedding."
-            )
+        # Assuming best_guess_embedding is valid if it exists
         assert best_guess_embedding is not None  # For type hinting
 
         embedding_dim = best_guess_embedding.shape[0]
