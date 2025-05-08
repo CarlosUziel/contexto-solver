@@ -19,7 +19,7 @@ def get_qdrant_client() -> Optional[QdrantClient]:
 
     Returns:
         Optional[QdrantClient]: An initialized QdrantClient instance, or None if
-                                connection fails.
+            connection fails.
     """
     logger.info("Attempting to connect to Qdrant...")
     try:
@@ -68,27 +68,44 @@ def get_collection_info(
 
 
 def get_random_point(
-    _client: QdrantClient, collection_name: str, total_points: int
+    _client: QdrantClient,
+    collection_name: str,
+    total_points: int,
+    excluded_words: Optional[Set[str]] = None,
 ) -> Optional[Record]:
     """Fetches a single random point (word and vector) from the collection using random sampling.
+    Can optionally exclude a set of words.
 
     Args:
         _client (QdrantClient): An initialized QdrantClient instance.
         collection_name (str): The name of the collection.
         total_points (int): The total number of points in the collection (used for logging).
+        excluded_words (Optional[Set[str]], optional): A set of words to exclude. Defaults to None.
 
     Returns:
         Optional[Record]: A Qdrant Record object containing the random point's data,
-                          or None if an error occurs or no point is returned.
+                          or None if an error occurs or no suitable point is returned.
     """
+    query_filter: Optional[rest_models.Filter] = None
+    if excluded_words and len(excluded_words) > 0:
+        logger.info(f"Applying exclusion filter for {len(excluded_words)} words.")
+        query_filter = rest_models.Filter(
+            must_not=[
+                rest_models.FieldCondition(
+                    key="word", match=rest_models.MatchAny(any=list(excluded_words))
+                )
+            ]
+        )
+
     logger.info(
         f"Attempting to select a random point from '{collection_name}' using random sampling (reported total: "
-        f"{total_points})..."
+        f"{total_points}), filter {'applied' if query_filter else 'not applied'}."
     )
     try:
         query_responses = _client.query_points(
             collection_name=collection_name,
             query=models.SampleQuery(sample=models.Sample.RANDOM),
+            query_filter=query_filter,  # Apply the filter here
             limit=1,  # We need only one random point
             with_payload=True,
             with_vectors=True,
@@ -122,6 +139,31 @@ def get_random_point(
             exc_info=True,
         )
         return None
+
+
+def create_qdrant_exclusion_filter(
+    excluded_words: Optional[Set[str]],
+) -> Optional[rest_models.Filter]:
+    """
+    Creates a Qdrant filter object to exclude a given set of words.
+
+    Args:
+        excluded_words (Optional[Set[str]]): A set of words to exclude.
+                                             If None or empty, returns None.
+
+    Returns:
+        Optional[rest_models.Filter]: A Qdrant Filter object or None.
+    """
+    if not excluded_words:
+        return None
+    logger.info(f"Creating exclusion filter for {len(excluded_words)} words.")
+    return rest_models.Filter(
+        must_not=[
+            rest_models.FieldCondition(
+                key="word", match=rest_models.MatchAny(any=list(excluded_words))
+            )
+        ]
+    )
 
 
 def get_all_similarities(
@@ -236,19 +278,26 @@ def find_closest_word_to_point(
     point_vector: List[float],
     exclude_words: Set[str],
 ) -> Optional[str]:
+    """Finds the closest word embedding in the Qdrant collection to a given point.
+
+    This function searches the specified Qdrant collection for the word whose
+    vector representation is most similar (closest) to the provided `point_vector`,
+    while ensuring that any words listed in `exclude_words` are not considered.
+
+    Args:
+        client: An initialized QdrantClient instance.
+        collection_name: The name of the Qdrant collection to search within.
+        point_vector: A list of floats representing the vector of the point
+            for which the closest word is to be found.
+        exclude_words: A set of strings, where each string is a word to be
+            excluded from the search results.
+
+    Returns:
+        Optional[str]: The closest word (as a string) found in the collection that
+            is not in `exclude_words`. Returns None if no suitable word is found
+            or if an error occurs during the search.
     """
-    Finds the closest word embedding in the Qdrant collection to a given point,
-    excluding specified words.
-    """
-    q_filter = None
-    if exclude_words:
-        q_filter = rest_models.Filter(
-            must_not=[
-                rest_models.FieldCondition(
-                    key="word", match=rest_models.MatchAny(any=list(exclude_words))
-                )
-            ]
-        )
+    q_filter = create_qdrant_exclusion_filter(exclude_words)
 
     try:
         hits = client.search(
