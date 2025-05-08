@@ -66,43 +66,6 @@ class ContextoSolver:
 
         self.current_negative_reference_embedding: Optional[np.ndarray] = None
 
-    def _fetch_random_word_from_collection(self) -> str:
-        """
-        Fetches a random word from the Qdrant collection.
-        Assumes __init__ has validated the collection's initial state.
-        Handles potential issues if collection state changes post-init.
-
-        Returns:
-            str: A random word from the collection.
-        Raises:
-            ValueError: If a random point cannot be fetched or a valid word
-                        cannot be extracted from its payload, or if the collection
-                        becomes inaccessible/empty post-init.
-            AttributeError: If collection_info becomes None unexpectedly (e.g.,
-                            collection deleted post-init), when trying to access points_count.
-        """
-        logger.debug(
-            f"Attempting to fetch a random word from collection '{self.collection_name}'."
-        )
-        collection_info = get_collection_info(self.client, self.collection_name)
-
-        random_point_record = get_random_point(
-            self.client, self.collection_name, collection_info.points_count
-        )
-
-        if random_point_record and random_point_record.payload:
-            word = random_point_record.payload.get("word")
-            if word and isinstance(word, str) and word.strip():
-                logger.debug(f"Successfully fetched random word: '{word}'.")
-                return word
-
-        logger.error(
-            f"Failed to get a random point or extract a valid word from its payload from collection '{self.collection_name}'."
-        )
-        raise ValueError(
-            f"Failed to get a random point/word from collection '{self.collection_name}'."
-        )
-
     def add_guess(self, word: str, rank: int) -> bool:
         """
         Adds a new guess, updates context pairs, and manages positive/negative references.
@@ -121,15 +84,12 @@ class ContextoSolver:
             return False
 
         embedding = get_vector_for_word(self.client, self.collection_name, word)
-        if embedding is None or not (
-            isinstance(embedding, np.ndarray)
-            and embedding.ndim == 1
-            and embedding.shape[0] > 0
-        ):
+        if not ContextoSolver._is_valid_embedding(embedding):
             logger.warning(
                 f"Could not retrieve a valid embedding for word '{word}'. Guess not added, context not updated."
             )
             return False
+        assert embedding is not None  # For type hinting and static analysis
 
         pair_positive_embedding: Optional[np.ndarray] = None
         pair_negative_embedding: Optional[np.ndarray] = None
@@ -165,6 +125,42 @@ class ContextoSolver:
             f"Added guess: Word '{word}', Rank {rank}. Total past guesses: {len(self.past_guesses)}."
         )
         return True
+
+    def _fetch_random_word_from_collection(self) -> str:
+        """
+        Fetches a random word from the Qdrant collection.
+        Assumes __init__ has validated the collection's initial state.
+        Handles potential issues if collection state changes post-init.
+
+        Returns:
+            str: A random word from the collection.
+        Raises:
+            ValueError: If a random point cannot be fetched or a valid word
+                        cannot be extracted from its payload, or if the collection
+                        becomes inaccessible/empty post-init.
+            AttributeError: If collection_info becomes None unexpectedly (e.g.,
+                            collection deleted post-init), when trying to access points_count.
+        """
+        logger.debug(
+            f"Attempting to fetch a random word from collection '{self.collection_name}'."
+        )
+
+        random_point_record = get_random_point(
+            self.client, self.collection_name, self.collection_info.points_count
+        )
+
+        if random_point_record and random_point_record.payload:
+            word = random_point_record.payload.get("word")
+            if word and isinstance(word, str) and word.strip():
+                logger.debug(f"Successfully fetched random word: '{word}'.")
+                return word
+
+        logger.error(
+            f"Failed to get a random point or extract a valid word from its payload from collection '{self.collection_name}'."
+        )
+        raise ValueError(
+            f"Failed to get a random point/word from collection '{self.collection_name}'."
+        )
 
     def _process_first_guess(
         self, word: str, rank: int, embedding: np.ndarray
@@ -216,22 +212,13 @@ class ContextoSolver:
         Returns:
             Optional embedding vector of a random word, or None if no suitable word was found
         """
-        for i in range(5):
+        for i in range(settings.max_distant_embedding_attempts):
             try:
                 random_word_str = self._fetch_random_word_from_collection()
                 if random_word_str not in excluded_words:
-                    embedding = get_vector_for_word(
+                    return get_vector_for_word(
                         self.client, self.collection_name, random_word_str
                     )
-                    if (
-                        embedding is not None
-                        and embedding.ndim == 1
-                        and embedding.shape[0] > 0
-                    ):
-                        logger.info(
-                            f"Found random distant word '{random_word_str}' for context on attempt {i + 1}."
-                        )
-                        return embedding
             except (ValueError, AttributeError) as e_fetch:
                 logger.warning(
                     f"Attempt {i + 1} to get random word for distant embedding failed: {e_fetch}"
@@ -319,8 +306,8 @@ class ContextoSolver:
         if not self.past_guesses:
             logger.info("No past guesses. Making an initial random guess.")
             try:
-                return self._solve_no_past_guesses()
-            except ValueError as e:
+                return self._fetch_random_word_from_collection()
+            except (ValueError, AttributeError) as e:
                 logger.error(f"Error making initial random guess: {e}")
                 raise SolverUnableToGuessError(
                     "Failed to make an initial random guess."
@@ -367,51 +354,53 @@ class ContextoSolver:
 
     def _determine_target_vector(self) -> Optional[List[float]]:
         """
-        Determine the target vector for discovery search based on past guesses.
-
-        Returns:
-            Optional list of floats representing the target vector, or None if no suitable target
+        Determine the target vector for discovery search.
+        Prioritizes centroid of positive embeddings, falls back to best guess embedding.
         """
-        if not self.positive_embeddings_for_centroid:
-            logger.warning(
-                "No positive embeddings for centroid. Attempting to use best guess embedding as target."
-            )
+
+        def get_best_guess_embedding_list() -> Optional[List[float]]:
             if self.past_guesses:
-                logger.info("Using best guess embedding as target for discovery.")
-                return self.past_guesses[0][2].tolist()
+                embedding = self.past_guesses[0][2]
+                if ContextoSolver._is_valid_embedding(embedding):
+                    assert embedding is not None  # for type checker
+                    logger.info("Using best guess embedding as target/fallback.")
+                    return embedding.tolist()
             logger.warning(
-                "No past guesses available, cannot determine a target vector."
+                "No valid past guesses available to use as target/fallback for target vector."
             )
             return None
 
-        logger.info(
-            f"Calculating centroid from {len(self.positive_embeddings_for_centroid)} positive embeddings."
-        )
-        centroid_vector = np.mean(
-            np.array(self.positive_embeddings_for_centroid), axis=0
-        )
-
-        if (
-            centroid_vector is not None
-            and centroid_vector.ndim == 1
-            and centroid_vector.shape[0] > 0
-        ):
+        if self.positive_embeddings_for_centroid:
             logger.info(
-                "Using centroid of positive embeddings as target for discovery."
+                f"Calculating centroid from {len(self.positive_embeddings_for_centroid)} positive embeddings."
             )
-            return centroid_vector.tolist()
 
-        logger.warning(
-            "Failed to compute valid centroid. Attempting to use best guess embedding as target fallback."
-        )
-        if self.past_guesses:
-            logger.info("Using best guess embedding as fallback target for discovery.")
-            return self.past_guesses[0][2].tolist()
+            valid_embeddings = [
+                emb
+                for emb in self.positive_embeddings_for_centroid
+                if ContextoSolver._is_valid_embedding(emb)
+            ]
 
-        logger.warning(
-            "Centroid calculation failed and no past guesses to use as fallback target."
-        )
-        return None
+            if not valid_embeddings:
+                logger.warning(
+                    "No valid embeddings in positive_embeddings_for_centroid. Falling back."
+                )
+            else:
+                centroid_vector = np.mean(np.array(valid_embeddings), axis=0)
+                if ContextoSolver._is_valid_embedding(centroid_vector):
+                    assert centroid_vector is not None  # for type checker
+                    logger.info(
+                        "Using centroid of positive embeddings as target for discovery."
+                    )
+                    return centroid_vector.tolist()
+                else:
+                    logger.warning("Computed centroid is invalid. Falling back.")
+        else:
+            logger.warning(
+                "No positive embeddings for centroid. Attempting fallback to best guess."
+            )
+
+        return get_best_guess_embedding_list()
 
     def _create_exclusion_filter(
         self, excluded_words: Set[str]
@@ -512,14 +501,11 @@ class ContextoSolver:
             f"StepFromBestGuess: Attempting from best guess '{best_guess_word}'."
         )
 
-        if not (
-            isinstance(best_guess_embedding, np.ndarray)
-            and best_guess_embedding.ndim == 1
-            and best_guess_embedding.shape[0] > 0
-        ):
+        if not ContextoSolver._is_valid_embedding(best_guess_embedding):
             raise SolverUnableToGuessError(
                 f"StepFromBestGuess: Best guess '{best_guess_word}' has an invalid embedding."
             )
+        assert best_guess_embedding is not None  # For type hinting
 
         embedding_dim = best_guess_embedding.shape[0]
         random_direction = np.random.randn(embedding_dim)
@@ -583,17 +569,3 @@ class ContextoSolver:
             raise SolverUnableToGuessError(
                 "Ultimate fallback failed: Unable to fetch any random word from the collection."
             ) from e
-
-    def _solve_no_past_guesses(self) -> str:
-        """
-        Handles the case where there are no past guesses by fetching a random word.
-        Relies on _fetch_random_word_from_collection for the core logic.
-
-        Returns:
-            str: A random word from the collection.
-        Raises:
-            ValueError: If a random point cannot be fetched.
-            AttributeError: If collection_info becomes None unexpectedly.
-        """
-        logger.info("Attempting to make a random guess as there are no past guesses.")
-        return self._fetch_random_word_from_collection()

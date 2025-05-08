@@ -1,6 +1,6 @@
 import logging
-import sys
 import os  # Added import
+import sys
 
 
 def setup_logger(name: str = __name__, level: int = logging.INFO) -> logging.Logger:
