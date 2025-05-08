@@ -69,10 +69,11 @@ def initialize_game():
         st.session_state.run_full_autosolve = False
         st.session_state.error_message = None
         st.session_state.show_win_message = False
-        st.session_state.autosolve_start_time = None  # Reset autosolve timer
-        if st.session_state.game:  # Ensure game object exists before logging
+        st.session_state.autosolve_start_time = None
+        if st.session_state.game:
             logger.info(
-                f"New game started/initialized. Target: {st.session_state.game.get_target_word()}"
+                f"New game started/initialized. Target: "
+                f"{st.session_state.game.get_target_word()}"
             )
     except Exception as e:
         logger.error(f"Error initializing game: {e}")
@@ -123,7 +124,8 @@ def render_play_game_controls_column():
                     if st.session_state.game and st.session_state.solver:
                         st.session_state.solver.past_guesses = []
                         logger.info(
-                            "Populating solver with existing game guesses for autosolve session."
+                            "Populating solver with existing game guesses for "
+                            "autosolve session."
                         )
                         for item in st.session_state.game.guesses:
                             st.session_state.solver.add_guess(item[0], item[1])
@@ -180,7 +182,9 @@ def render_play_game_controls_column():
                 duration_message = f" in {solve_duration:.2f} seconds"
                 st.session_state.autosolve_start_time = None
             st.success(
-                f"🎉 Congratulations! You found the word: {st.session_state.game.get_target_word()} in {len(st.session_state.game.guesses)} guesses{duration_message}."
+                f"🎉 Congratulations! You found the word: "
+                f"{st.session_state.game.get_target_word()} in "
+                f"{len(st.session_state.game.guesses)} guesses{duration_message}."
             )
             st.session_state.show_win_message = True
             st.session_state.run_full_autosolve = False
@@ -233,9 +237,13 @@ def perform_autosolve_step_if_active():
                     )
                     st.session_state.solver.add_guess(suggested_word, rank)
                 else:
-                    st.session_state.solver_message = f"🤖 Solver's guess '{suggested_word}' was not recognized by the game."
+                    st.session_state.solver_message = (
+                        f"🤖 Solver's guess '{suggested_word}' was not recognized "
+                        "by the game."
+                    )
                     logger.warning(
-                        f"Autosolve: Solver suggested invalid word '{suggested_word}' which make_guess returned None for."
+                        f"Autosolve: Solver suggested invalid word '{suggested_word}' "
+                        "which make_guess returned None for."
                     )
             else:
                 st.session_state.solver_message = (
@@ -255,8 +263,6 @@ def handle_play_game_mode():
 
     if st.session_state.error_message:
         st.error(st.session_state.error_message)
-        # Consider clearing the error message if it's meant to be displayed once per action
-        # st.session_state.error_message = None
 
     col1, col2 = st.columns([1, 5])
     with col1:
@@ -307,7 +313,8 @@ def run_benchmark_games(num_games_to_benchmark):
                 or "Unknown error during game initialization."
             )
             logger.error(
-                f"Benchmark: Failed to initialize game {current_game_num}. Error: {error_msg}"
+                f"Benchmark: Failed to initialize game {current_game_num}. "
+                f"Error: {error_msg}"
             )
             all_individual_guesses_counts.append(-1)
             all_individual_game_times.append(None)
@@ -319,7 +326,8 @@ def run_benchmark_games(num_games_to_benchmark):
         current_game_guesses_made = 0
         game_start_time = time.time()
         logger.info(
-            f"Benchmark Game {current_game_num}: Target word is {game_instance.get_target_word()}"
+            f"Benchmark Game {current_game_num}: Target word is "
+            f"{game_instance.get_target_word()}"
         )
 
         while (
@@ -333,7 +341,8 @@ def run_benchmark_games(num_games_to_benchmark):
                     word_to_try = suggested_word
             except Exception as e:
                 logger.error(
-                    f"Benchmark Game {current_game_num}: Error during solver_instance.guess_word(): {e}"
+                    f"Benchmark Game {current_game_num}: Error during "
+                    f"solver_instance.guess_word(): {e}"
                 )
                 break
 
@@ -345,14 +354,17 @@ def run_benchmark_games(num_games_to_benchmark):
                         solver_instance.add_guess(word_to_try, rank_bench)
                     else:
                         logger.warning(
-                            f"Benchmark Game {current_game_num}: Solver's guess '{word_to_try}' was not recognized. Target: {game_instance.get_target_word()}"
+                            f"Benchmark Game {current_game_num}: Solver's guess "
+                            f"'{word_to_try}' was not recognized. Target: "
+                            f"{game_instance.get_target_word()}"
                         )
                         break
                 except (
                     Exception
                 ) as e:  # Includes ValueError from make_guess if word is invalid
                     logger.error(
-                        f"Benchmark Game {current_game_num}: Error during game_instance.make_guess('{word_to_try}'): {e}"
+                        f"Benchmark Game {current_game_num}: Error during "
+                        f"game_instance.make_guess('{word_to_try}'): {e}"
                     )
                     break
             else:
@@ -370,7 +382,9 @@ def run_benchmark_games(num_games_to_benchmark):
             total_time_for_all_solved_games += game_duration
             all_individual_game_times.append(game_duration)
             logger.info(
-                f"Benchmark Game {current_game_num} WON in {num_guesses_this_game} guesses, {game_duration:.2f}s. Target: {game_instance.get_target_word()}"
+                f"Benchmark Game {current_game_num} WON in {num_guesses_this_game} "
+                f"guesses, {game_duration:.2f}s. Target: "
+                f"{game_instance.get_target_word()}"
             )
         else:
             final_guess_count = len(game_instance.guesses)
@@ -383,7 +397,9 @@ def run_benchmark_games(num_games_to_benchmark):
                 )  # Solver failure or other break
                 all_individual_game_times.append(None)
             logger.warning(
-                f"Benchmark Game {current_game_num} NOT WON. Guesses: {final_guess_count}, Time: {game_duration:.2f}s. Target: {game_instance.get_target_word()}"
+                f"Benchmark Game {current_game_num} NOT WON. Guesses: "
+                f"{final_guess_count}, Time: {game_duration:.2f}s. Target: "
+                f"{game_instance.get_target_word()}"
             )
 
     st.session_state.benchmark_progress = 1.0
@@ -418,9 +434,14 @@ def run_benchmark_games(num_games_to_benchmark):
         avg_guesses_log = total_guesses_for_all_solved_games / successful_games_count
         avg_time_log = total_time_for_all_solved_games / successful_games_count
         logger.info(
-            f"Benchmark finished. Median guesses: {median_guesses if isinstance(median_guesses, str) else median_guesses:.2f} ± {std_guesses if isinstance(std_guesses, str) else std_guesses:.2f}, "
-            f"Median time: {median_solve_time if isinstance(median_solve_time, str) else median_solve_time:.2f}s ± {std_solve_time if isinstance(std_solve_time, str) else std_solve_time:.2f}s "
-            f"over {successful_games_count}/{num_games_to_benchmark} games. (Avg guesses: {avg_guesses_log:.2f}, Avg time: {avg_time_log:.2f}s)"
+            f"Benchmark finished. Median guesses: "
+            f"{median_guesses if isinstance(median_guesses, str) else median_guesses:.2f} "
+            f"± {std_guesses if isinstance(std_guesses, str) else std_guesses:.2f}, "
+            f"Median time: "
+            f"{median_solve_time if isinstance(median_solve_time, str) else median_solve_time:.2f}s "
+            f"± {std_solve_time if isinstance(std_solve_time, str) else std_solve_time:.2f}s "
+            f"over {successful_games_count}/{num_games_to_benchmark} games. "
+            f"(Avg guesses: {avg_guesses_log:.2f}, Avg time: {avg_time_log:.2f}s)"
         )
     else:
         logger.warning("Benchmark finished. No games were successfully solved.")
@@ -464,13 +485,17 @@ def display_benchmark_results():
         if isinstance(
             results["median_solve_time"], (float, np.floating)
         ) and isinstance(results["std_solve_time"], (float, np.floating)):
-            median_time_display = f"{results['median_solve_time']:.2f}s ± {results['std_solve_time']:.2f}s"
+            median_time_display = (
+                f"{results['median_solve_time']:.2f}s ± "
+                f"{results['std_solve_time']:.2f}s"
+            )
         elif results["median_solve_time"] != "N/A":
             median_time_display = f"{results['median_solve_time']:.2f}s"
         st.metric(label="Median Solve Time per Solved Game", value=median_time_display)
 
     st.write(
-        f"Successfully solved games: {results['successful_games']} out of {results['total_games']}"
+        f"Successfully solved games: {results['successful_games']} out of "
+        f"{results['total_games']}"
     )
 
     if results["all_guesses_counts"]:
@@ -500,7 +525,8 @@ def display_benchmark_results():
         ]
         if successful_guess_counts:
             st.write(
-                "Distribution of guesses for successfully solved games (excluding maxed out):"
+                "Distribution of guesses for successfully solved games "
+                "(excluding maxed out):"
             )
             st.bar_chart(pd.Series(successful_guess_counts).value_counts().sort_index())
 
@@ -527,7 +553,7 @@ def handle_benchmark_mode():
     num_games_input = st.number_input(
         "Number of games to benchmark:",
         min_value=1,
-        value=10,
+        value=32,
         step=1,
         key="num_benchmark_games",
         disabled=st.session_state.benchmark_running,
@@ -542,9 +568,6 @@ def handle_benchmark_mode():
 
     if st.session_state.benchmark_results and not st.session_state.benchmark_running:
         display_benchmark_results()
-
-    # elif st.session_state.benchmark_running: # UI updates handled by run_benchmark_games
-    #     pass
 
 
 # --- Main Application Flow ---

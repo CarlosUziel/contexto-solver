@@ -101,36 +101,48 @@ class ContextoGame:
         return self.word_to_rank_and_vector.get(word.lower())
 
     def make_guess(self, word: str) -> Optional[int]:
-        """Processes a player's guess (case-insensitive).
-
-        Checks if the word is valid, records it with its rank and vector.
-        Guesses are stored in lowercase.
+        """
+        Processes a player's guess and returns its rank if valid.
 
         Args:
-            word (str): The word guessed by the player.
+            word: The word guessed by the player.
 
         Returns:
-            Optional[int]: The rank of the guessed word if valid, otherwise None.
-        """
-        normalized_word = word.lower()
-        rank_and_vector_data = self.get_word_rank_and_vector(normalized_word)
+            The rank of the word (0-indexed) if the guess is valid and found,
+            None otherwise.
 
-        if rank_and_vector_data is not None:
-            rank, vector = rank_and_vector_data
-            # Avoid adding duplicate guesses
-            if not any(guess[0] == normalized_word for guess in self.guesses):
-                self.guesses.append((normalized_word, rank, vector))
-                # Sort guesses by rank after adding
-                self.guesses.sort(key=lambda item: item[1])
-                logger.info(f"Guess added: '{normalized_word}' (Rank: {rank})")
-            else:
-                logger.debug(f"Duplicate guess ignored: '{normalized_word}'")
-            return rank
-        else:
-            logger.info(
-                f"Invalid guess: '{normalized_word}' not found in similarity list."
+        Raises:
+            ValueError: If the guessed word is not in the game's vocabulary.
+        """
+        normalized_word = word.strip().lower()
+        if not normalized_word:
+            logger.warning("Attempted to guess an empty or whitespace-only word.")
+            raise ValueError("Guess cannot be empty.")
+
+        # Retrieve rank and vector using the existing method
+        rank_vector_tuple = self.get_word_rank_and_vector(normalized_word)
+
+        if rank_vector_tuple is None:
+            logger.warning(
+                f"Guessed word '{normalized_word}' not in vocabulary or no vector. "
+                f"Target: '{self.target_word}'"
             )
-            return None
+            raise ValueError(
+                f"Word '{normalized_word}' is not in the game's vocabulary "
+                "or has no associated vector."
+            )
+
+        rank, word_vector = rank_vector_tuple
+
+        # Add to guesses list if not already guessed
+        if not any(g[0] == normalized_word for g in self.guesses):
+            self.guesses.append((normalized_word, rank, word_vector))
+            self.guesses.sort(key=lambda x: x[1])  # Keep sorted by rank
+            logger.info(
+                f"Guess '{normalized_word}' (Rank: {rank}) added. Total guesses: "
+                f"{len(self.guesses)}. Target: '{self.target_word}'"
+            )
+        return rank
 
     def get_guesses(self) -> List[Tuple[str, int, np.ndarray]]:
         """Returns the list of guesses made so far, sorted by rank.
@@ -151,9 +163,5 @@ class ContextoGame:
         return any(guess[0] == self.target_word.lower() for guess in self.guesses)
 
     def get_target_word(self) -> str:
-        """Returns the target word for the current game.
-
-        Returns:
-            str: The target word.
-        """
+        """Returns the target word for the current game."""
         return self.target_word

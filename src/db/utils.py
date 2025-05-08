@@ -1,5 +1,3 @@
-# Database utility functions
-
 from typing import Dict, List, Optional, Set, Tuple
 
 import numpy as np
@@ -98,8 +96,9 @@ def get_random_point(
         )
 
     logger.info(
-        f"Attempting to select a random point from '{collection_name}' using random sampling (reported total: "
-        f"{total_points}), filter {'applied' if query_filter else 'not applied'}."
+        f"Attempting to select a random point from '{collection_name}' using random "
+        f"sampling (reported total: {total_points}), filter "
+        f"{'applied' if query_filter else 'not applied'}."
     )
     try:
         query_responses = _client.query_points(
@@ -118,18 +117,20 @@ def get_random_point(
             if random_scored_point.payload and "word" in random_scored_point.payload:
                 actual_word = random_scored_point.payload["word"]
                 logger.info(
-                    f"Successfully retrieved random point using sampling: ID {random_scored_point.id}, Word: "
-                    f"'{actual_word}'"
+                    f"Successfully retrieved random point using sampling: ID "
+                    f"{random_scored_point.id}, Word: '{actual_word}'"
                 )
                 return random_scored_point
             else:
                 logger.error(
-                    f"Random sampling returned a point (ID: {random_scored_point.id}) but it's missing payload or 'word'."
+                    f"Random sampling returned a point (ID: {random_scored_point.id}) "
+                    f"but it's missing payload or 'word'."
                 )
                 return None
         else:
             logger.error(
-                f"Random sampling did not return any points from collection '{collection_name}'."
+                f"Random sampling did not return any points from collection "
+                f"'{collection_name}'."
             )
             return None
 

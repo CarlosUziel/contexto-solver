@@ -37,7 +37,8 @@ class ContextoSolver:
         self.client = client
         self.collection_name = collection_name
         logger.info(
-            f"Initializing ContextoSolver for collection '{collection_name}' with iterative discovery strategy."
+            f"Initializing ContextoSolver for collection '{collection_name}'"
+            " with iterative discovery strategy."
         )
 
         collection_info = get_collection_info(self.client, self.collection_name)
@@ -47,7 +48,8 @@ class ContextoSolver:
             or collection_info.points_count == 0
         ):
             logger.error(
-                f"Cannot initialize ContextoSolver: Collection '{self.collection_name}' is empty or does not exist."
+                f"Cannot initialize ContextoSolver: Collection "
+                f"'{self.collection_name}' is empty or does not exist."
             )
             raise ValueError(
                 f"Collection '{self.collection_name}' is empty or does not exist."
@@ -81,7 +83,8 @@ class ContextoSolver:
         embedding = get_vector_for_word(self.client, self.collection_name, word)
         if embedding is None:  # Check if embedding is None directly
             logger.warning(
-                f"Could not retrieve a valid embedding for word '{word}'. Guess not added, context not updated."
+                f"Could not retrieve a valid embedding for word '{word}'. "
+                "Guess not added, context not updated."
             )
             return False
 
@@ -109,7 +112,8 @@ class ContextoSolver:
             )
         else:
             logger.error(
-                "Failed to determine valid positive/negative embeddings for context pair. Pair not added."
+                "Failed to determine valid positive/negative embeddings for context pair. "
+                "Pair not added."
             )
 
         self.__past_guesses.append((word, rank, embedding))
@@ -160,10 +164,12 @@ class ContextoSolver:
                 return word
 
         logger.error(
-            f"Failed to get a random point or extract a valid word from its payload from collection '{self.collection_name}'."
+            f"Failed to get a random point or extract a valid word from its payload "
+            f"from collection '{self.collection_name}'."
         )
         raise ValueError(
-            f"Failed to get a random point/word from collection '{self.collection_name}'."
+            f"Failed to get a random point/word from collection "
+            f"'{self.collection_name}'."
         )
 
     def _process_first_guess(
@@ -191,7 +197,8 @@ class ContextoSolver:
         self.__positive_embeddings_for_centroid.append(embedding)
 
         logger.info(
-            "Using negation of the first guess's embedding as the initial negative context."
+            "Using negation of the first guess's embedding as the initial "
+            "negative context."
         )
         distant_negative_embedding = -embedding.copy()
 
@@ -265,7 +272,8 @@ class ContextoSolver:
 
         if num_past_guesses > 1:
             logger.info(
-                f"Calculating centroid from {len(self.__positive_embeddings_for_centroid)} positive embeddings."
+                f"Calculating centroid from "
+                f"{len(self.__positive_embeddings_for_centroid)} positive embeddings."
             )
             target_vector = np.mean(
                 np.array(self.__positive_embeddings_for_centroid), axis=0
@@ -327,7 +335,8 @@ class ContextoSolver:
                         )
                         return candidate_word
             logger.warning(
-                "Discovery search returned candidates, but none were new or suitable after processing."
+                "Discovery search returned candidates, but none were new or suitable "
+                "after processing."
             )
             raise SolverUnableToGuessError("Discovery search returned no results.")
 

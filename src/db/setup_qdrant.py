@@ -249,13 +249,18 @@ def setup_qdrant_collection(
         )
 
     # Attempt to create the collection
+    logger.info(
+        f"Attempting to create collection '{collection_name}' with vector size "
+        f"{vector_size}."
+    )
     try:
-        logger.info(f"Attempting to create collection '{collection_name}'...")
         client.create_collection(
             collection_name=collection_name,
             vectors_config=VectorParams(size=vector_size, distance=Distance.COSINE),
         )
-        logger.info(f"Collection '{collection_name}' created successfully.")
+        logger.info(
+            f"Collection '{collection_name}' created successfully or already exists."
+        )
     except Exception as create_err:
         logger.error(f"Failed to create collection '{collection_name}': {create_err}")
         raise
