@@ -201,68 +201,64 @@ def download_and_extract_glove(
 def setup_qdrant_collection(
     client: QdrantClient, collection_name: str, vector_size: int
 ) -> None:
-    """Checks if a Qdrant collection exists. If it does, it's deleted and recreated.
-    Then, creates it if it doesn't exist.
+    """Ensures a Qdrant collection with the specified name and vector size exists.
+
+    If the collection already exists, it is deleted and then recreated.
+    If it does not exist, it is created.
 
     Args:
-        client (QdrantClient): An initialized QdrantClient instance.
-        collection_name (str): The name for the Qdrant collection.
-        vector_size (int): The dimensionality of the vectors to be stored.
-
-    Returns:
-        None.
+        client: An initialized QdrantClient instance.
+        collection_name: The name for the Qdrant collection.
+        vector_size: The dimensionality of the vectors to be stored.
 
     Raises:
-        Exception: If creating the collection fails.
+        Exception: If creating the collection fails for reasons other than
+                   it already existing (which is handled by deletion and recreation).
     """
     try:
-        # 1. Check if collection exists
-        client.get_collection(collection_name=collection_name)
         logger.info(
-            f"Collection '{collection_name}' already exists. Deleting and recreating."
+            f"Attempting to delete collection '{collection_name}' if it exists..."
         )
-        # Delete existing collection
         client.delete_collection(collection_name=collection_name)
-        # Recreate the collection
-        client.create_collection(
-            collection_name=collection_name,
-            vectors_config=VectorParams(size=vector_size, distance=Distance.COSINE),
+        logger.info(
+            f"Collection '{collection_name}' deleted successfully or did not exist."
         )
-        logger.info(f"Collection '{collection_name}' recreated successfully.")
-
-    except Exception as e:
-        # 2. Check if the error is specifically 'Not Found'
+    except (rest_exceptions.UnexpectedResponse, grpc.RpcError) as e:
+        # Check if the error is specifically 'Not Found'
         is_not_found_error = False
         if isinstance(e, grpc.RpcError) and e.code() == grpc.StatusCode.NOT_FOUND:
             is_not_found_error = True
         elif isinstance(e, rest_exceptions.UnexpectedResponse) and e.status_code == 404:
-            # Handle potential REST API 'Not Found' if gRPC fails or isn't used
             is_not_found_error = True
 
         if is_not_found_error:
-            # Log cleanly if collection simply doesn't exist yet
             logger.info(
-                f"Collection '{collection_name}' not found. Attempting to create."
+                f"Collection '{collection_name}' did not exist, no deletion needed."
             )
         else:
-            # Log as warning for other unexpected errors during the check
+            # Log other errors during deletion as a warning but proceed to create
             logger.warning(
-                f"Warning during collection check for '{collection_name}': {e}. "
-                f"Attempting to create anyway."
+                f"Warning during attempt to delete collection '{collection_name}': {e}. "
+                f"Proceeding to attempt creation."
             )
+    except Exception as e:
+        # Catch any other unexpected errors during deletion
+        logger.warning(
+            f"Unexpected error during attempt to delete collection '{collection_name}': {e}. "
+            f"Proceeding to attempt creation."
+        )
 
-        # 3. Attempt to create the collection
-        try:
-            client.create_collection(
-                collection_name=collection_name,
-                vectors_config=VectorParams(size=vector_size, distance=Distance.COSINE),
-            )
-            logger.info(f"Collection '{collection_name}' created successfully.")
-        except Exception as create_err:
-            logger.error(
-                f"Failed to create collection '{collection_name}': {create_err}"
-            )
-            raise
+    # Attempt to create the collection
+    try:
+        logger.info(f"Attempting to create collection '{collection_name}'...")
+        client.create_collection(
+            collection_name=collection_name,
+            vectors_config=VectorParams(size=vector_size, distance=Distance.COSINE),
+        )
+        logger.info(f"Collection '{collection_name}' created successfully.")
+    except Exception as create_err:
+        logger.error(f"Failed to create collection '{collection_name}': {create_err}")
+        raise
 
 
 def upsert_embeddings(
