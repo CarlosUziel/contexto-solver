@@ -37,6 +37,7 @@
     <li><a href="#-algorithm-explanation">💡 Algorithm Explanation</a></li>
     <li><a href="#-configuration-options">⚙️ Configuration Options</a></li>
     <li><a href="#-license">📄 License</a></li>
+    <li><a href="#-additional-notes">📝 Additional Notes</a></li>
     <li><a href="#-contact">👤 Contact</a></li>
     <li><a href="#-acknowledgments">🙏 Acknowledgments</a></li>
   </ol>
@@ -216,6 +217,17 @@ This iterative cycle of guessing, receiving rank feedback, updating context ($\m
 ## 📄 License
 
 Distributed under the MIT License. See `LICENSE` for more information.
+
+<p align="right">(<a href="#top">back to top</a>)</p>
+
+<!-- ADDITIONAL NOTES -->
+## 📝 Additional Notes
+
+This codebase is linted and formatted using [Ruff](https://github.com/astral-sh/ruff). The following command is run as a pre-commit hook to ensure code quality:
+
+```bash
+ruff check . --fix && ruff format . && ruff check --fix --select I
+```
 
 <p align="right">(<a href="#top">back to top</a>)</p>
 
