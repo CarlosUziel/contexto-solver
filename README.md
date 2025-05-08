@@ -156,8 +156,6 @@ The application's behavior can be customized through environment variables defin
 
 ### Solver Algorithm Parameters
 
-*   `BASE_STEP_SCALE`: Base step scale for the solver's random step fallback mechanism (Fallback Strategy 1). A smaller value results in finer adjustments, while a larger value allows for more significant exploration steps.
-    *   Default: `0.05`
 *   `QDRANT_HNSW_EF`: The 'ef' (size of the dynamic list for HNSW) parameter for Qdrant search. This affects search speed and accuracy. Higher values can lead to more accurate searches but may increase latency.
     *   Default: `64`
 

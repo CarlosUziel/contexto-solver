@@ -23,7 +23,6 @@ class Settings(BaseSettings):
         qdrant_log_level: Logging level for the Qdrant service.
         qdrant_uuid_namespace: Namespace for generating Qdrant point UUIDs.
         glove_dataset: Specifies the GloVe dataset to use for word embeddings.
-        base_step_scale: Base step scale for the solver's random step fallback mechanism.
         qdrant_hnsw_ef: The 'ef' (size of the dynamic list for HNSW) parameter for Qdrant search.
     """
 
@@ -76,10 +75,6 @@ class Settings(BaseSettings):
     ] = Field(
         default="glove.6B.100d",
         description="Specifies the GloVe dataset to use for word embeddings.",
-    )
-    base_step_scale: float = Field(
-        default=0.05,
-        description="Base step scale for the solver's random step fallback mechanism.",
     )
     qdrant_hnsw_ef: int = Field(
         default=64,
