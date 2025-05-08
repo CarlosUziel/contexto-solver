@@ -54,17 +54,17 @@ class ContextoSolver:
             )
         self.collection_info = collection_info
 
-        self.past_guesses: List[Tuple[str, int, np.ndarray]] = []
+        self.__past_guesses: List[Tuple[str, int, np.ndarray]] = []
 
-        self.context_pairs_for_discovery: List[rest_models.ContextExamplePair] = []
+        self.__context_pairs_for_discovery: List[rest_models.ContextExamplePair] = []
 
-        self.positive_embeddings_for_centroid: List[np.ndarray] = []
+        self.__positive_embeddings_for_centroid: List[np.ndarray] = []
 
-        self.current_positive_point_details: Optional[Tuple[str, int, np.ndarray]] = (
+        self.__current_positive_point_details: Optional[Tuple[str, int, np.ndarray]] = (
             None
         )
 
-        self.current_negative_reference_embedding: Optional[np.ndarray] = None
+        self.__current_negative_reference_embedding: Optional[np.ndarray] = None
 
     def add_guess(self, word: str, rank: int) -> bool:
         """
@@ -77,7 +77,7 @@ class ContextoSolver:
         Returns:
             bool: True if the guess was successfully added, False otherwise
         """
-        if any(past_word == word for past_word, _, _ in self.past_guesses):
+        if any(past_word == word for past_word, _, _ in self.__past_guesses):
             logger.info(
                 f"Word '{word}' has already been guessed. Skipping context update."
             )
@@ -93,7 +93,7 @@ class ContextoSolver:
         pair_positive_embedding: Optional[np.ndarray] = None
         pair_negative_embedding: Optional[np.ndarray] = None
 
-        if not self.past_guesses:
+        if not self.__past_guesses:
             pair_positive_embedding, pair_negative_embedding = (
                 self._process_first_guess(word, rank, embedding)
             )
@@ -103,25 +103,25 @@ class ContextoSolver:
             )
 
         if pair_positive_embedding is not None and pair_negative_embedding is not None:
-            self.context_pairs_for_discovery.append(
+            self.__context_pairs_for_discovery.append(
                 rest_models.ContextExamplePair(
                     positive=pair_positive_embedding.tolist(),
                     negative=pair_negative_embedding.tolist(),
                 )
             )
             logger.info(
-                f"Added context pair. Total pairs: {len(self.context_pairs_for_discovery)}"
+                f"Added context pair. Total pairs: {len(self.__context_pairs_for_discovery)}"
             )
         else:
             logger.error(
                 "Failed to determine valid positive/negative embeddings for context pair. Pair not added."
             )
 
-        self.past_guesses.append((word, rank, embedding))
-        self.past_guesses.sort(key=lambda x: x[1])
+        self.__past_guesses.append((word, rank, embedding))
+        self.__past_guesses.sort(key=lambda x: x[1])
 
         logger.info(
-            f"Added guess: Word '{word}', Rank {rank}. Total past guesses: {len(self.past_guesses)}."
+            f"Added guess: Word '{word}', Rank {rank}. Total past guesses: {len(self.__past_guesses)}."
         )
         return True
 
@@ -168,9 +168,9 @@ class ContextoSolver:
         Process the first guess, updating solver state and determining initial context pair embeddings.
 
         Side effects:
-            - Sets `self.current_positive_point_details`.
-            - Appends to `self.positive_embeddings_for_centroid`.
-            - Sets `self.current_negative_reference_embedding`.
+            - Sets `self.__current_positive_point_details`.
+            - Appends to `self.__positive_embeddings_for_centroid`.
+            - Sets `self.__current_negative_reference_embedding`.
 
         Args:
             word: The guessed word
@@ -182,8 +182,8 @@ class ContextoSolver:
         """
         new_guess_details = (word, rank, embedding)
 
-        self.current_positive_point_details = new_guess_details
-        self.positive_embeddings_for_centroid.append(embedding)
+        self.__current_positive_point_details = new_guess_details
+        self.__positive_embeddings_for_centroid.append(embedding)
 
         distant_negative_embedding = self._get_random_distant_embedding(
             excluded_words=[word]
@@ -195,7 +195,7 @@ class ContextoSolver:
             )
             distant_negative_embedding = -embedding.copy()
 
-        self.current_negative_reference_embedding = distant_negative_embedding
+        self.__current_negative_reference_embedding = distant_negative_embedding
 
         return embedding, distant_negative_embedding
 
@@ -239,10 +239,10 @@ class ContextoSolver:
         Process a guess after the first one, updating context reference points and solver state.
 
         Side effects:
-            - May update `self.current_positive_point_details`.
-            - May append to `self.positive_embeddings_for_centroid`.
-            - Sets `self.current_negative_reference_embedding`.
-            - Handles a critical fallback if `self.current_positive_point_details` is unexpectedly None.
+            - May update `self.__current_positive_point_details`.
+            - May append to `self.__positive_embeddings_for_centroid`.
+            - Sets `self.__current_negative_reference_embedding`.
+            - Handles a critical fallback if `self.__current_positive_point_details` is unexpectedly None.
 
         Args:
             word: The guessed word
@@ -254,38 +254,38 @@ class ContextoSolver:
         """
         new_guess_details = (word, rank, embedding)
 
-        if self.current_positive_point_details is None:
+        if self.__current_positive_point_details is None:
             logger.error(
-                "Critical: current_positive_point_details is None after first guess. Resetting."
+                "Critical: __current_positive_point_details is None after first guess. Resetting."
             )
-            self.current_positive_point_details = new_guess_details
-            self.positive_embeddings_for_centroid.append(embedding)
+            self.__current_positive_point_details = new_guess_details
+            self.__positive_embeddings_for_centroid.append(embedding)
 
             pair_positive_embedding = embedding
             pair_negative_embedding = -embedding.copy()
-            self.current_negative_reference_embedding = pair_negative_embedding
+            self.__current_negative_reference_embedding = pair_negative_embedding
             return pair_positive_embedding, pair_negative_embedding
 
         _, prev_positive_rank, prev_positive_embedding = (
-            self.current_positive_point_details
+            self.__current_positive_point_details
         )
 
         if rank < prev_positive_rank:
             pair_positive_embedding = embedding
             pair_negative_embedding = prev_positive_embedding
 
-            self.current_positive_point_details = new_guess_details
+            self.__current_positive_point_details = new_guess_details
             is_duplicate = any(
                 np.array_equal(embedding, e)
-                for e in self.positive_embeddings_for_centroid
+                for e in self.__positive_embeddings_for_centroid
             )
             if not is_duplicate:
-                self.positive_embeddings_for_centroid.append(embedding)
-            self.current_negative_reference_embedding = prev_positive_embedding
+                self.__positive_embeddings_for_centroid.append(embedding)
+            self.__current_negative_reference_embedding = prev_positive_embedding
         else:
             pair_positive_embedding = prev_positive_embedding
             pair_negative_embedding = embedding
-            self.current_negative_reference_embedding = embedding
+            self.__current_negative_reference_embedding = embedding
 
         return pair_positive_embedding, pair_negative_embedding
 
@@ -300,7 +300,7 @@ class ContextoSolver:
         Raises:
             SolverUnableToGuessError: If no suitable word can be determined after all strategies.
         """
-        if not self.past_guesses:
+        if not self.__past_guesses:
             logger.info("No past guesses. Making an initial random guess.")
             try:
                 return self._fetch_random_word_from_collection()
@@ -310,16 +310,16 @@ class ContextoSolver:
                     "Failed to make an initial random guess."
                 ) from e
 
-        if self.context_pairs_for_discovery:
+        if self.__context_pairs_for_discovery:
             logger.info("Attempting discovery search...")
-            num_past_guesses = len(self.past_guesses)
+            num_past_guesses = len(self.__past_guesses)
             target_vector: Optional[List[float]] = None
             limit = 10 if num_past_guesses == 1 else 1
 
             if num_past_guesses > 1:
                 target_vector = self._determine_target_vector()
 
-            excluded_words = {word for word, _, _ in self.past_guesses}
+            excluded_words = {word for word, _, _ in self.__past_guesses}
             query_filter = self._create_exclusion_filter(excluded_words)
 
             candidate_word = self._execute_discovery_search(
@@ -349,41 +349,20 @@ class ContextoSolver:
                 "All guessing strategies failed."
             ) from e_random
 
-    def _determine_target_vector(self) -> Optional[List[float]]:
+    def _determine_target_vector(self) -> List[float]:
         """
         Determine the target vector for discovery search.
-        Prioritizes centroid of positive embeddings, falls back to best guess embedding.
+        Uses the centroid of positive embeddings. Assumes __positive_embeddings_for_centroid is non-empty.
         """
-
-        def get_best_guess_embedding_list() -> Optional[List[float]]:
-            if self.past_guesses:
-                embedding = self.past_guesses[0][2]
-                assert embedding is not None  # for type checker
-                logger.info("Using best guess embedding as target/fallback.")
-                return embedding.tolist()
-            logger.warning(
-                "No valid past guesses available to use as target/fallback for target vector."
-            )
-            return None
-
-        if self.positive_embeddings_for_centroid:
-            logger.info(
-                f"Calculating centroid from {len(self.positive_embeddings_for_centroid)} positive embeddings."
-            )
-
-            centroid_vector = np.mean(
-                np.array(self.positive_embeddings_for_centroid), axis=0
-            )
-            logger.info(
-                "Using centroid of positive embeddings as target for discovery."
-            )
-            return centroid_vector.tolist()
-
-        logger.warning(
-            "No positive embeddings for centroid. Attempting fallback to best guess."
+        logger.info(
+            f"Calculating centroid from {len(self.__positive_embeddings_for_centroid)} positive embeddings."
         )
 
-        return get_best_guess_embedding_list()
+        centroid_vector = np.mean(
+            np.array(self.__positive_embeddings_for_centroid), axis=0
+        )
+        logger.info("Using centroid of positive embeddings as target for discovery.")
+        return centroid_vector.tolist()
 
     def _create_exclusion_filter(
         self, excluded_words: Set[str]
@@ -428,7 +407,7 @@ class ContextoSolver:
             The best candidate word or None if no suitable word was found
         """
         logger.info(
-            f"Performing discovery search: {len(self.context_pairs_for_discovery)} context pairs, "
+            f"Performing discovery search: {len(self.__context_pairs_for_discovery)} context pairs, "
             f"target {'present' if target_vector else 'absent'}, "
             f"excluding {len(excluded_words)} words, hnsw_ef: {settings.qdrant_hnsw_ef}."
         )
@@ -437,7 +416,7 @@ class ContextoSolver:
             search_results = self.client.discover(
                 collection_name=self.collection_name,
                 target=target_vector,
-                context=self.context_pairs_for_discovery,
+                context=self.__context_pairs_for_discovery,
                 limit=limit,
                 query_filter=query_filter,
                 with_payload=True,
@@ -474,12 +453,12 @@ class ContextoSolver:
         Raises:
             SolverUnableToGuessError: If preconditions are not met or no word is found.
         """
-        if not self.past_guesses:
+        if not self.__past_guesses:
             raise SolverUnableToGuessError(
                 "StepFromBestGuess: Cannot attempt without past guesses."
             )
 
-        best_guess_word, _, best_guess_embedding = self.past_guesses[0]
+        best_guess_word, _, best_guess_embedding = self.__past_guesses[0]
         logger.info(
             f"StepFromBestGuess: Attempting from best guess '{best_guess_word}'."
         )
@@ -500,7 +479,7 @@ class ContextoSolver:
         step_scale = settings.base_step_scale
         new_point_vector = best_guess_embedding + step_scale * random_direction
 
-        excluded_words = {word for word, _, _ in self.past_guesses}
+        excluded_words = {word for word, _, _ in self.__past_guesses}
         closest_word = find_closest_word_to_point(
             self.client,
             self.collection_name,
@@ -528,7 +507,7 @@ class ContextoSolver:
         """
         logger.info("Executing ultimate fallback: trying a random guess.")
         try:
-            excluded_words = {word for word, _, _ in self.past_guesses}
+            excluded_words = {word for word, _, _ in self.__past_guesses}
             for i in range(5):
                 random_word = self._fetch_random_word_from_collection()
                 if random_word not in excluded_words:
