@@ -55,15 +55,11 @@ class ContextoSolver:
         self.collection_info = collection_info
 
         self.__past_guesses: List[Tuple[str, int, np.ndarray]] = []
-
         self.__context_pairs_for_discovery: List[rest_models.ContextExamplePair] = []
-
         self.__positive_embeddings_for_centroid: List[np.ndarray] = []
-
         self.__current_positive_point_details: Optional[Tuple[str, int, np.ndarray]] = (
             None
         )
-
         self.__current_negative_reference_embedding: Optional[np.ndarray] = None
 
     def add_guess(self, word: str, rank: int) -> bool:
@@ -166,6 +162,7 @@ class ContextoSolver:
     ) -> Tuple[np.ndarray, np.ndarray]:
         """
         Process the first guess, updating solver state and determining initial context pair embeddings.
+        The negative context is always the negation of the first guess's embedding.
 
         Side effects:
             - Sets `self.__current_positive_point_details`.
@@ -185,52 +182,14 @@ class ContextoSolver:
         self.__current_positive_point_details = new_guess_details
         self.__positive_embeddings_for_centroid.append(embedding)
 
-        distant_negative_embedding = self._get_random_distant_embedding(
-            excluded_words=[word]
+        logger.info(
+            "Using negation of the first guess's embedding as the initial negative context."
         )
-
-        if distant_negative_embedding is None:
-            logger.warning(
-                "Using negation of the first guess as fallback for initial negative context."
-            )
-            distant_negative_embedding = -embedding.copy()
+        distant_negative_embedding = -embedding.copy()
 
         self.__current_negative_reference_embedding = distant_negative_embedding
 
         return embedding, distant_negative_embedding
-
-    def _get_random_distant_embedding(
-        self, excluded_words: List[str]
-    ) -> Optional[np.ndarray]:
-        """
-        Attempts to get an embedding of a random word not in excluded_words.
-
-        Args:
-            excluded_words: List of words to exclude from the random selection
-
-        Returns:
-            Optional embedding vector of a random word, or None if no suitable word was found
-        """
-        for i in range(settings.max_distant_embedding_attempts):
-            try:
-                random_word_str = self._fetch_random_word_from_collection()
-                if random_word_str not in excluded_words:
-                    return get_vector_for_word(
-                        self.client, self.collection_name, random_word_str
-                    )
-            except (ValueError, AttributeError) as e_fetch:
-                logger.warning(
-                    f"Attempt {i + 1} to get random word for distant embedding failed: {e_fetch}"
-                )
-            except Exception as e:
-                logger.warning(
-                    f"Attempt {i + 1} to get random word for distant embedding failed with unexpected error: {e}"
-                )
-
-        logger.warning(
-            "Failed to find a suitable random distant embedding after multiple attempts."
-        )
-        return None
 
     def _process_subsequent_guess(
         self, word: str, rank: int, embedding: np.ndarray
