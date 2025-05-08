@@ -186,8 +186,9 @@ Here's a breakdown of the solver's process:
 
     *   **Target Vector ($V_{target}$) Determination**:
         *   The solver maintains a list of embeddings, $\mathcal{V}_{positive\_centroid}$, which includes the embedding of the first guess and any subsequent guess that became the new best guess.
-            *   **For the second guess ($G_1$, when $|\mathcal{G}_{past}|=1$)**: The `target` vector is `None`. The Discovery API search relies solely on the initial context pair. The `limit` for search results is higher (e.g., 8) to encourage broader exploration.
-            *   **For guesses $G_i$ where $i \ge 2$ (when $|\mathcal{G}_{past}| > 1$)**: The `target` vector $V_{target}$ is the centroid (mean) of all embeddings in $\mathcal{V}_{positive\_centroid}$. The `limit` for search results is typically 1.
+            *   **For the second guess ($G_1$, when $|\mathcal{G}_{past}|=1$)**: The `target` vector is `None`. The Discovery API search relies solely on the initial context pair.
+            *   **For guesses $G_i$ where $i \ge 2$ (when $|\mathcal{G}_{past}| > 1$)**: The `target` vector $V_{target}$ is the centroid (mean) of all embeddings in $\mathcal{V}_{positive\_centroid}$.
+            *   In all discovery searches (i.e., for any guess $G_i$ where $i \ge 1$), the `limit` for search results is 1. This focuses the search on the single best candidate based on the current context and target vector (if present).
 
     *   **Executing Discovery Search**:
         *   The solver calls Qdrant's `discover` method with the accumulated $\mathcal{C}$, the determined $V_{target}$ (if any), a filter to exclude words in $\mathcal{G}_{past}$, and other search parameters like `hnsw_ef`.
@@ -206,7 +207,7 @@ Here's a breakdown of the solver's process:
 ### Failure Condition
 
 *   If the initial random guess cannot be fetched (e.g., collection issue), a `SolverUnableToGuessError` is raised.
-*   If the Qdrant Discovery Search, after processing its results, does not yield any new candidate word (i.e., all candidates returned by Qdrant are already in $\mathcal{G}_{past}$ or no candidates are returned), the solver raises a `SolverUnableToGuessError`.
+*   If the Qdrant Discovery Search, after processing its results, does not yield any new candidate word (i.e., all candidates returned by Qdrant are already in $\mathcal{G}_{past}$ or no candidates are returned), the solver raises a `SolverUnableToGuessError`. This indicates a critical failure in the core guessing strategy, as the solver relies on discovery search to make progress.
 *   If the Discovery Search itself encounters an operational error (e.g., an issue with the Qdrant service), a `SolverUnableToGuessError` is raised, wrapping the original exception.
 
 This iterative cycle of guessing, receiving rank feedback, updating context ($\mathcal{C}, V_{target}, \mathcal{V}_{positive\_centroid}$), and strategically querying the vector database allows the solver to progressively narrow the search space towards the secret word.
