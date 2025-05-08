@@ -12,6 +12,4 @@ __pycache__/
 .vscode
 .qdrant_storage
 .ruff_cache
-
-# Log directory
-.logs/
+.logs
