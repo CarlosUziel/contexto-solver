@@ -34,7 +34,7 @@
         <li><a href="#usage">Usage</a></li>
       </ul>
     </li>
-    <li><a href="#-algorithm-explanation">⚙️ Algorithm Explanation</a></li>
+    <li><a href="#-algorithm-explanation">💡 Algorithm Explanation</a></li>
     <li><a href="#-configuration-options">⚙️ Configuration Options</a></li>
     <li><a href="#-license">📄 License</a></li>
     <li><a href="#-contact">👤 Contact</a></li>
@@ -165,7 +165,7 @@ The application's behavior can be customized through environment variables defin
 
 <p align="right">(<a href="#top">back to top</a>)</p>
 
-## ⚙️ Algorithm Explanation
+## 💡 Algorithm Explanation
 
 The Contexto solver employs a sophisticated, multi-stage strategy to pinpoint the secret word. This process heavily relies on Qdrant's vector search capabilities, especially its [*Discovery API*](https://qdrant.tech/documentation/concepts/explore/#discovery-api), to navigate the word-embedding space efficiently. Let $V$ represent the vector embedding of a word.
 
@@ -179,7 +179,7 @@ Here's a breakdown of the solver's process:
     *   **Context Pair Generation**: Each guess helps build a list of context pairs $\mathcal{C} = [(V_{pos}^{(j)}, V_{neg}^{(j)})]$. Let $(w_{best}, r_{best}, V_{best})$ be the details of the guess with the lowest rank encountered so far.
         *   **First Guess Processing (to form $(V_{pos}^{(0)}, V_{neg}^{(0)})$ )**: When the first guess $(w_0, r_0, V_0)$ is processed:
             *   The positive example is $V_{pos}^{(0)} = V_0$.
-            *   To determine the negative example $V_{neg}^{(0)}$, the solver first attempts to find a random word $w_{rand}$ from the collection such that $w_{rand} \neq w_0$. This attempt is made up to a configured number of times. If a suitable $w_{rand}$ is found and its embedding $V_{rand}$ is retrieved, then $V_{neg}^{(0)} = V_{rand}$. If these attempts fail to yield a suitable distinct random word, the solver uses the negation of the first guess's embedding as a fallback: $V_{neg}^{(0)} = -V_0$.
+            *   To determine the negative example $V_{neg}^{(0)}$, the solver first attempts to find a random word $w_{rand}$ from the collection such that $w_{rand} \neq w_0$. This attempt is made up to a configured number of times. If a suitable $w_{rand}$ is found and its embedding $V_{rand}$ is retrieved, then $V_{neg}^{(0)} = $V_{rand}$. If these attempts fail to yield a suitable distinct random word, the solver uses the negation of the first guess's embedding as a fallback: $V_{neg}^{(0)} = -V_0$.
             *   $(w_{best}, r_{best}, V_{best})$ is initialized to $(w_0, r_0, V_0)$.
             *   A list of unique embeddings from guesses that improved upon the previous best rank, $\mathcal{V}_{imp}$, is initialized with $V_0$.
         *   **Subsequent Guess Processing (for new guess $(w_{new}, r_{new}, V_{new})$ to form $(V_{pos}^{(k)}, V_{neg}^{(k)})$ )**:
