@@ -56,11 +56,11 @@ class ContextoSolver:
             )
         self.collection_info = collection_info
 
-        self.__past_guesses: List[Tuple[str, int, np.ndarray]] = []
+        self.__guessed_words_set: Set[str] = set()
         self.__context_pairs_for_discovery: List[rest_models.ContextExamplePair] = []
         self.__positive_embeddings_for_centroid: List[np.ndarray] = []
-        self.__current_positive_point_details: Optional[Tuple[str, int, np.ndarray]] = (
-            None
+        self.__current_positive_point_details: Optional[Tuple[int, np.ndarray]] = (
+            None  # Stores (rank, embedding)
         )
 
     def add_guess(self, word: str, rank: int) -> bool:
@@ -74,24 +74,28 @@ class ContextoSolver:
         Returns:
             bool: True if the guess was successfully added, False otherwise
         """
-        if any(past_word == word for past_word, _, _ in self.__past_guesses):
+        # 1. Check if the word has already been guessed
+        if word in self.__guessed_words_set:
             logger.info(
                 f"Word '{word}' has already been guessed. Skipping context update."
             )
             return False
 
+        # 2. Get the embedding for the word
         embedding = get_vector_for_word(self.client, self.collection_name, word)
-        if embedding is None:  # Check if embedding is None directly
+        if embedding is None:
             logger.warning(
                 f"Could not retrieve a valid embedding for word '{word}'. "
                 "Guess not added, context not updated."
             )
             return False
 
+        # 3. Initialize variables for context pair embeddings
         pair_positive_embedding: Optional[np.ndarray] = None
         pair_negative_embedding: Optional[np.ndarray] = None
 
-        if not self.__past_guesses:
+        # 4. Process the guess based on whether it's the first guess or a subsequent one
+        if not self.__guessed_words_set:
             pair_positive_embedding, pair_negative_embedding = (
                 self._process_first_guess(word, rank, embedding)
             )
@@ -100,6 +104,7 @@ class ContextoSolver:
                 self._process_subsequent_guess(word, rank, embedding)
             )
 
+        # 5. Add the new context pair if valid embeddings were determined
         if pair_positive_embedding is not None and pair_negative_embedding is not None:
             self.__context_pairs_for_discovery.append(
                 rest_models.ContextExamplePair(
@@ -108,7 +113,8 @@ class ContextoSolver:
                 )
             )
             logger.info(
-                f"Added context pair. Total pairs: {len(self.__context_pairs_for_discovery)}"
+                "Added context pair. Total pairs: "
+                f"{len(self.__context_pairs_for_discovery)}"
             )
         else:
             logger.error(
@@ -116,13 +122,141 @@ class ContextoSolver:
                 "Pair not added."
             )
 
-        self.__past_guesses.append((word, rank, embedding))
-        self.__past_guesses.sort(key=lambda x: x[1])
+        # 6. Add the guess to guessed words set
+        self.__guessed_words_set.add(word)
 
         logger.info(
-            f"Added guess: Word '{word}', Rank {rank}. Total past guesses: {len(self.__past_guesses)}."
+            f"Added guess: Word '{word}', Rank {rank}. "
+            f"Total past guesses: {len(self.__guessed_words_set)}."
         )
         return True
+
+    def _process_first_guess(
+        self, word: str, rank: int, embedding: np.ndarray
+    ) -> Tuple[np.ndarray, np.ndarray]:
+        """
+        Process the first guess, updating solver state and determining initial context pair embeddings.
+        The negative context is always the negation of the first guess's embedding.
+
+        Side effects:
+            - Calls _update_positive_references to set current positive point and update centroid data.
+
+        Args:
+            word: The guessed word
+            rank: The rank of the guessed word
+            embedding: The embedding vector of the guessed word
+
+        Returns:
+            Tuple of (positive_embedding, negative_embedding) for context pair formation
+        """
+        self._update_positive_references(word, rank, embedding)
+        return embedding, -embedding.copy()
+
+    def _update_positive_references(self, word: str, rank: int, embedding: np.ndarray):
+        """
+        Updates the solver's current positive reference point (rank and embedding)
+        and appends the embedding to the list for centroid calculation.
+        The word is used for logging.
+
+        Args:
+            word: The word of the new positive reference (for logging).
+            rank: The rank of the new positive reference.
+            embedding: The embedding of the new positive reference.
+        """
+        self.__current_positive_point_details = (rank, embedding)
+        self.__positive_embeddings_for_centroid.append(embedding)
+        logger.info(
+            f"Updated current positive reference to: Word '{word}', Rank {rank}. "
+            f"Total positive embeddings for centroid: {len(self.__positive_embeddings_for_centroid)}."
+        )
+
+    def _process_subsequent_guess(
+        self, word: str, rank: int, embedding: np.ndarray
+    ) -> Tuple[np.ndarray, np.ndarray]:
+        """
+        Process a guess after the first one, updating context reference points and solver state.
+
+        Side effects:
+            - May call _update_positive_references if the current guess is better than the previous positive.
+
+        Args:
+            word: The guessed word
+            rank: The rank of the guessed word
+            embedding: The embedding vector of the guessed word
+
+        Returns:
+            Tuple of (positive_embedding, negative_embedding) for context pair formation
+        """
+        # 1. Get details of the previous best positive guess (rank and embedding)
+        prev_positive_rank, prev_positive_embedding = (
+            self.__current_positive_point_details
+        )
+
+        # 2. Determine positive and negative embeddings for the context pair based on rank
+        if rank < prev_positive_rank:
+            pair_positive_embedding = embedding
+            pair_negative_embedding = prev_positive_embedding
+            self._update_positive_references(word, rank, embedding)
+        else:
+            pair_positive_embedding = prev_positive_embedding
+            pair_negative_embedding = embedding
+
+        return pair_positive_embedding, pair_negative_embedding
+
+    def guess_word(self) -> str:
+        """
+        Get the next best guess using Qdrant's Discovery Search with accumulated context.
+        Follows a sequence of strategies: initial random, discovery search,
+        and finally a general random guess if discovery fails.
+
+        Returns:
+            str: The suggested word to guess next.
+        Raises:
+            SolverUnableToGuessError: If no suitable word can be determined after all strategies.
+        """
+        # 1. If no past guesses, fetch and return an initial random word
+        if not self.__guessed_words_set:  # Changed from __past_guesses
+            logger.info("No past guesses. Making an initial random guess.")
+            try:
+                # No exclusions for the very first guess
+                return self._fetch_random_word_from_collection()
+            except (ValueError, AttributeError) as e:
+                logger.error(f"Error making initial random guess: {e}")
+                raise SolverUnableToGuessError(
+                    "Failed to make an initial random guess."
+                ) from e
+
+        # 2. Initialize variables for discovery search
+        target_vector: Optional[List[float]] = None
+
+        # 3. If more than one past guess, calculate target vector (centroid of positive embeddings)
+        if len(self.__guessed_words_set) > 1:
+            logger.info(
+                f"Calculating centroid from "
+                f"{len(self.__positive_embeddings_for_centroid)} positive embeddings."
+            )
+            target_vector = np.mean(
+                np.array(self.__positive_embeddings_for_centroid), axis=0
+            ).tolist()
+            logger.info(
+                "Using centroid of positive embeddings as target for discovery."
+            )
+
+        # 4. Execute discovery search
+        candidate_word = self._execute_discovery_search(
+            target_vector, self.__guessed_words_set
+        )
+
+        # 5. Return candidate word or raise an exception if discovery fails
+        if candidate_word:
+            return candidate_word
+        else:
+            logger.error(
+                "Discovery search did not yield a result. This is a critical failure."
+            )
+            raise SolverUnableToGuessError(
+                "Discovery search failed to find a candidate word. Solver cannot proceed."
+            )
 
     def _fetch_random_word_from_collection(
         self, excluded_words: Optional[Set[str]] = None
@@ -134,7 +268,8 @@ class ContextoSolver:
         Handles potential issues if collection state changes post-init.
 
         Args:
-            excluded_words (Optional[Set[str]], optional): A set of words to exclude. Defaults to None.
+            excluded_words (Optional[Set[str]], optional): A set of words to exclude.
+                Defaults to None.
 
         Returns:
             str: A random word from the collection.
@@ -150,6 +285,7 @@ class ContextoSolver:
             f"{(', excluding specified words.' if excluded_words else '.')}"
         )
 
+        # 1. Get a random point from the Qdrant collection
         random_point_record = get_random_point(
             self.client,
             self.collection_name,
@@ -157,6 +293,7 @@ class ContextoSolver:
             excluded_words=excluded_words,
         )
 
+        # 2. Validate the random point and extract the word from its payload
         if random_point_record and random_point_record.payload:
             word = random_point_record.payload.get("word")
             if word and isinstance(word, str) and word.strip():
@@ -172,173 +309,48 @@ class ContextoSolver:
             f"'{self.collection_name}'."
         )
 
-    def _process_first_guess(
-        self, word: str, rank: int, embedding: np.ndarray
-    ) -> Tuple[np.ndarray, np.ndarray]:
-        """
-        Process the first guess, updating solver state and determining initial context pair embeddings.
-        The negative context is always the negation of the first guess's embedding.
-
-        Side effects:
-            - Sets `self.__current_positive_point_details`.
-            - Appends to `self.__positive_embeddings_for_centroid`.
-
-        Args:
-            word: The guessed word
-            rank: The rank of the guessed word
-            embedding: The embedding vector of the guessed word
-
-        Returns:
-            Tuple of (positive_embedding, negative_embedding) for context pair formation
-        """
-        new_guess_details = (word, rank, embedding)
-
-        self.__current_positive_point_details = new_guess_details
-        self.__positive_embeddings_for_centroid.append(embedding)
-
-        logger.info(
-            "Using negation of the first guess's embedding as the initial "
-            "negative context."
-        )
-        distant_negative_embedding = -embedding.copy()
-
-        return embedding, distant_negative_embedding
-
-    def _process_subsequent_guess(
-        self, word: str, rank: int, embedding: np.ndarray
-    ) -> Tuple[np.ndarray, np.ndarray]:
-        """
-        Process a guess after the first one, updating context reference points and solver state.
-
-        Side effects:
-            - May update `self.__current_positive_point_details`.
-            - May append to `self.__positive_embeddings_for_centroid`.
-
-        Args:
-            word: The guessed word
-            rank: The rank of the guessed word
-            embedding: The embedding vector of the guessed word
-
-        Returns:
-            Tuple of (positive_embedding, negative_embedding) for context pair formation
-        """
-        new_guess_details = (word, rank, embedding)
-
-        _, prev_positive_rank, prev_positive_embedding = (
-            self.__current_positive_point_details
-        )
-
-        if rank < prev_positive_rank:
-            pair_positive_embedding = embedding
-            pair_negative_embedding = prev_positive_embedding
-
-            self.__current_positive_point_details = new_guess_details
-            is_duplicate = any(
-                np.array_equal(embedding, e)
-                for e in self.__positive_embeddings_for_centroid
-            )
-            if not is_duplicate:
-                self.__positive_embeddings_for_centroid.append(embedding)
-        else:
-            pair_positive_embedding = prev_positive_embedding
-            pair_negative_embedding = embedding
-
-        return pair_positive_embedding, pair_negative_embedding
-
-    def guess_word(self) -> str:
-        """
-        Get the next best guess using Qdrant's Discovery Search with accumulated context.
-        Follows a sequence of strategies: initial random, discovery search,
-        step from best guess, and finally a general random guess.
-
-        Returns:
-            str: The suggested word to guess next.
-        Raises:
-            SolverUnableToGuessError: If no suitable word can be determined after all strategies.
-        """
-        if not self.__past_guesses:
-            logger.info("No past guesses. Making an initial random guess.")
-            try:
-                return self._fetch_random_word_from_collection()
-            except (ValueError, AttributeError) as e:
-                logger.error(f"Error making initial random guess: {e}")
-                raise SolverUnableToGuessError(
-                    "Failed to make an initial random guess."
-                ) from e
-
-        num_past_guesses = len(self.__past_guesses)
-        target_vector: Optional[List[float]] = None
-        limit = 8 if num_past_guesses == 1 else 1
-
-        if num_past_guesses > 1:
-            logger.info(
-                f"Calculating centroid from "
-                f"{len(self.__positive_embeddings_for_centroid)} positive embeddings."
-            )
-            target_vector = np.mean(
-                np.array(self.__positive_embeddings_for_centroid), axis=0
-            ).tolist()
-            logger.info(
-                "Using centroid of positive embeddings as target for discovery."
-            )
-
-        excluded_words = {word for word, _, _ in self.__past_guesses}
-        query_filter = create_qdrant_exclusion_filter(excluded_words)
-
-        return self._execute_discovery_search(
-            target_vector, limit, query_filter, excluded_words
-        )
-
     def _execute_discovery_search(
         self,
         target_vector: Optional[List[float]],
-        limit: int,
-        query_filter: Optional[rest_models.Filter],
         excluded_words: Set[str],
     ) -> Optional[str]:
         """
         Execute the Qdrant discovery search and process results.
+        Always fetches and processes only the top 1 result.
 
         Args:
             target_vector: Optional target vector for the search
-            limit: Maximum number of results to return
-            query_filter: Optional filter to exclude words (based on excluded_words)
-            excluded_words: Set of words to exclude from search results, used for logging and final check.
+            excluded_words: Set of words to exclude from search results.
 
         Returns:
             The best candidate word or None if no suitable word was found
         """
+        query_filter = create_qdrant_exclusion_filter(excluded_words)
         logger.info(
-            f"Performing discovery search: {len(self.__context_pairs_for_discovery)} context pairs, "
-            f"target {'present' if target_vector else 'absent'}, "
+            f"Performing discovery search: {len(self.__context_pairs_for_discovery)} "
+            f"context pairs, target {'present' if target_vector else 'absent'}, "
             f"excluding {len(excluded_words)} words, hnsw_ef: {settings.qdrant_hnsw_ef}."
         )
 
         try:
+            # 1. Perform discovery search using the Qdrant client, limit is hardcoded to 1
             search_results = self.client.discover(
                 collection_name=self.collection_name,
                 target=target_vector,
                 context=self.__context_pairs_for_discovery,
-                limit=limit,
+                limit=1,
                 query_filter=query_filter,
                 with_payload=True,
                 with_vectors=False,
                 search_params=rest_models.SearchParams(hnsw_ef=settings.qdrant_hnsw_ef),
             )
 
-            for hit in search_results:
-                if hit.payload and "word" in hit.payload:
-                    candidate_word = hit.payload["word"]
-                    if candidate_word not in excluded_words:
-                        logger.info(
-                            f"Discovery search suggested: '{candidate_word}' (score: {hit.score})"
-                        )
-                        return candidate_word
-            logger.warning(
-                "Discovery search returned candidates, but none were new or suitable "
-                "after processing."
+            # 2. Iterate through search results to find a suitable candidate word
+            logger.info(
+                f"Discovery search suggested: '{search_results[0].payload['word']}' "
+                f"(score: {search_results[0].score})"
             )
-            raise SolverUnableToGuessError("Discovery search returned no results.")
+            return search_results[0].payload["word"]
 
         except Exception as e:
             raise SolverUnableToGuessError(f"Discovery search failed: {e}") from e
