@@ -36,6 +36,7 @@
     </li>
     <li><a href="#-algorithm-explanation">💡 Algorithm Explanation</a></li>
     <li><a href="#-configuration-options">⚙️ Configuration Options</a></li>
+    <li><a href="#-file-descriptions">📂 File Descriptions</a></li>
     <li><a href="#-license">📄 License</a></li>
     <li><a href="#-additional-notes">📝 Additional Notes</a></li>
     <li><a href="#-contact">👤 Contact</a></li>
@@ -45,9 +46,11 @@
 
 ## 🧠 Motivation
 
-[Contexto](https://contexto.me) is a word puzzle game where players try to find a secret word. After each guess, the game tells you the position of your guessed word in a list sorted by similarity to the secret word. The closer your guess is to the secret word, the lower the number.
+[Contexto](https://contexto.me) is a word puzzle game where the primary objective is to discover a secret word. Players make guesses, and after each attempt, the game reveals the guessed word's rank. This rank indicates its position in a list sorted by similarity to the secret word—the lower the number, the closer the guess. The ultimate goal is to identify the secret word using the fewest number of attempts.
 
-This repository provides a Python-based solution to simulate and automatically solve the Contexto game. It works by instantiating a simulated version of the game and then employing a solver. The solver leverages the Qdrant vector database's discovery API to find the secret word by iteratively guessing words and narrowing down the search space based on the similarity scores provided by the game.
+The game's ranking system is powered by word embeddings, specifically GloVe (Global Vectors for Word Representation) embeddings. These embeddings capture the semantic relationships between words, meaning that words with similar meanings are located closer to each other in a high-dimensional vector space. The rank provided by Contexto reflects this semantic proximity: a guess semantically closer to the target word will receive a lower rank.
+
+This repository offers a Python-based solution that simulates the Contexto game and includes an automated solver. The user interface is a Streamlit web application, allowing users to play the game manually, observe the solver in action, or run benchmarks. This application connects to a Python backend that manages the game logic and implements the solving algorithm. At the core of this system is [Qdrant](https://qdrant.tech/), a vector database used to store, process, and efficiently query the GloVe word embeddings. Qdrant's capabilities, particularly its discovery API, are fundamental to the solver's strategy for navigating the embedding space and pinpointing the secret word.
 
 <p align="right">(<a href="#top">back to top</a>)</p>
 
@@ -162,6 +165,19 @@ The application's behavior can be customized through environment variables defin
 
 <p align="right">(<a href="#top">back to top</a>)</p>
 
+<!-- FILE DESCRIPTIONS -->
+## 📂 File Descriptions
+
+*   `src/app/contexto_app.py`: Creates the Streamlit web application interface for playing the Contexto game, watching the solver, and running benchmarks.
+*   `src/config/logger.py`: Sets up a configured logger for the application, outputting to both the console and a log file.
+*   `src/config/settings.py`: Defines and manages application settings using Pydantic, allowing configuration through environment variables or a `.env` file.
+*   `src/db/setup_qdrant.py`: Handles the download of GloVe embeddings and their setup in the Qdrant vector database.
+*   `src/db/utils.py`: Provides utility functions for interacting with the Qdrant database, such as connecting, fetching data, and performing searches.
+*   `src/game/contexto_game.py`: Defines the `ContextoGame` class, which manages the state and logic of a single Contexto game instance.
+*   `src/solver/contexto_solver.py`: Contains the `ContextoSolver` class, which implements the logic for automatically solving the Contexto game.
+
+<p align="right">(<a href="#top">back to top</a>)</p>
+
 ## 💡 Algorithm Explanation
 
 The Contexto solver employs a multi-stage strategy to pinpoint the secret word. This process heavily relies on Qdrant's vector search capabilities, especially its [*Discovery API*](https://qdrant.tech/documentation/concepts/explore/#discovery-api), to navigate the word-embedding space efficiently. Let $V$ represent the vector embedding of a word.
@@ -239,6 +255,13 @@ pre-commit install
 
 <p align="right">(<a href="#top">back to top</a>)</p>
 
+<!-- ACKNOWLEDGEMENTS -->
+## 🙏 Acknowledgments
+
+This repository proposes a solution to the [Contexto Challenge](https://gist.github.com/generall/98e18d5afae16bf444eff05c9fc7b74d), which relies on the [Qdrant](https://qdrant.tech/) vector database for efficient vector storage and retrieval. [This other solution](https://github.com/qdrant/contexto) was used as a reference to better understand the Contexto game mechanics and potential strategies.
+
+<p align="right">(<a href="#top">back to top</a>)</p>
+
 <!-- CONTACT -->
 ## 👤 Contact
 
@@ -248,12 +271,5 @@ pre-commit install
   <a href="https://www.linkedin.com/in/carlosuziel"><img src="https://img.shields.io/badge/LinkedIn-0077B5?style=for-the-badge&logo=linkedin&logoColor=white" alt="LinkedIn"></a>
   <a href="https://perez-malla.com/"><img src="https://img.shields.io/badge/Homepage-blue?style=for-the-badge&logo=home&logoColor=white" alt="Homepage"></a>
 </div>
-
-<p align="right">(<a href="#top">back to top</a>)</p>
-
-<!-- ACKNOWLEDGEMENTS -->
-## 🙏 Acknowledgments
-
-This repository proposes a solution to the [Contexto Challenge](https://gist.github.com/generall/98e18d5afae16bf444eff05c9fc7b74d), which relies on the [Qdrant](https://qdrant.tech/) vector database for efficient vector storage and retrieval. [This other solution](https://github.com/qdrant/contexto) was used as a reference to better understand the Contexto game mechanics and potential strategies.
 
 <p align="right">(<a href="#top">back to top</a>)</p>
