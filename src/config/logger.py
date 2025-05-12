@@ -1,62 +1,66 @@
-import logging
-import os  # Added import
+import os
 import sys
 
+from loguru import logger as loguru_logger
+from loguru._logger import Logger  # Import Logger for type hinting
 
-def setup_logger(name: str = __name__, level: int = logging.INFO) -> logging.Logger:
-    """Sets up and returns a configured logger instance.
 
-    The logger will output to both the console and a file named 'app.log'.
-    It avoids adding multiple handlers if the logger instance has already
-    been configured.
+def setup_logger(
+    name: str = __name__, level: str = "INFO"
+) -> Logger:  # Use Logger for type hint
+    """Sets up and returns a configured Loguru logger instance.
+
+    The logger will output to both the console and a file named 'app.log'
+    in the '.logs' directory. It configures Loguru's default logger.
 
     Args:
-        name: The name for the logger. Defaults to the module name.
-        level: The logging level (e.g., logging.INFO, logging.DEBUG).
-               Defaults to logging.INFO.
+        name: The name for the logger (Loguru typically uses module name automatically).
+        level: The logging level (e.g., "INFO", "DEBUG").
+               Defaults to "INFO".
 
     Returns:
-        A configured logging.Logger instance.
+        A configured Loguru logger instance.
     """
-    logger = logging.getLogger(name)
-    logger.setLevel(level)
+    # Remove default Loguru handler to avoid duplicate console logs if any
+    loguru_logger.remove()
 
-    # Avoid adding multiple handlers if logger already has them
-    if not logger.handlers:
-        formatter = logging.Formatter(
-            "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+    # Console Handler
+    loguru_logger.add(
+        sys.stdout,
+        level=level.upper(),
+        format="<green>{time:YYYY-MM-DD HH:mm:ss.SSS}</green> | "
+        "<level>{level: <8}</level> | "
+        "<cyan>{name}</cyan>:<cyan>{function}</cyan>:<cyan>{line}</cyan> - <level>{message}</level>",
+        colorize=True,
+    )
+
+    # File Handler
+    log_dir = ".logs"
+    log_file_name = "app.log"
+    log_file_path = os.path.join(log_dir, log_file_name)
+
+    try:
+        if not os.path.exists(log_dir):
+            os.makedirs(log_dir)
+        loguru_logger.add(
+            log_file_path,
+            level=level.upper(),
+            format="{time:YYYY-MM-DD HH:mm:ss.SSS} | {level: <8} | {name}:{function}:{line} - {message}",
+            rotation="10 MB",  # Rotate log file when it reaches 10 MB
+            retention="7 days",  # Keep logs for 7 days
+            compression="zip",  # Compress rotated files
+            enqueue=True,  # Asynchronous logging
+        )
+    except Exception as e:
+        # Use print for critical errors during logger setup
+        print(
+            f"Failed to set up file handler for Loguru logger: {e}",
+            file=sys.stderr,
         )
 
-        # Console Handler
-        ch = logging.StreamHandler(sys.stdout)
-        ch.setLevel(level)
-        ch.setFormatter(formatter)
-        logger.addHandler(ch)
-
-        # File Handler
-        # Ensure the .logs directory exists
-        log_dir = ".logs"
-        log_file_name = "app.log"
-        log_file_path = os.path.join(log_dir, log_file_name)
-
-        try:
-            if not os.path.exists(log_dir):
-                os.makedirs(log_dir)
-            fh = logging.FileHandler(log_file_path)  # Changed to use .logs/app.log
-            fh.setLevel(level)
-            fh.setFormatter(formatter)
-            logger.addHandler(fh)
-        except Exception as e:
-            # Log to stderr if file handler setup fails, as logger might not be fully set up.
-            print(
-                f"Failed to set up file handler for logger '{name}': {e}",
-                file=sys.stderr,
-            )
-
-    # Prevent log messages from propagating to the root logger
-    logger.propagate = False
-
-    return logger
+    # Loguru logger is configured globally, so we just return it.
+    # The 'name' argument is less critical for Loguru as it captures module context automatically.
+    return loguru_logger
 
 
 # Default application logger instance

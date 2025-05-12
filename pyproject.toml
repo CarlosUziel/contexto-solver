@@ -19,4 +19,5 @@ dependencies = [
     "nltk>=3.9.1",
     "watchdog>=6.0.0",
     "pre-commit>=4.2.0",
+    "loguru>=0.7.3",
 ]
