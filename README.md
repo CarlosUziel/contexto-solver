@@ -209,7 +209,8 @@ Here's a breakdown of the solver's process:
     *   **Executing Discovery Search**:
         *   The solver calls Qdrant's `discover` method with the accumulated $\mathcal{C}$, the determined $V_{target}$ (if any), a filter to exclude words in $\mathcal{G}_{past}$, and other search parameters like `hnsw_ef`.
 
-> **Qdrant Discovery API Behavior Notes:**
+> [!NOTE]
+> **More about Qdrant Discovery API:**
 > 
 > The Discovery API is a powerful feature for exploring the vector space. It allows searching for points (word embeddings in this case) that are "semantically similar" to a set of positive example vectors and "dissimilar" to a set of negative example vectors. This similarity/dissimilarity is typically determined by vector distances (e.g., cosine similarity or dot product) in the embedding space.
 >   -   When a `target` vector is provided, the search is not only guided by the positive/negative context pairs but is also biased towards this specific `target` point. This dual influence helps to steer the exploration towards a region of interest that the solver has identified as promising (e.g., the centroid of previously successful guesses), effectively refining the search within a known good area. The API attempts to find points that are close to the positive examples, far from the negative examples, and also close to the target vector.
