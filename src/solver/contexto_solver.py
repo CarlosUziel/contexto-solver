@@ -59,7 +59,9 @@ class ContextoSolver:
         self.__guessed_words_set: Set[str] = set()
         self.__not_allowed_words_set: Set[str] = set()  # New set for not allowed words
         self.__context_pairs_for_discovery: List[rest_models.ContextExamplePair] = []
-        self.__positive_embeddings_for_centroid: List[np.ndarray] = []
+        self.__ranked_positive_embeddings: List[
+            Tuple[int, np.ndarray]
+        ] = []  # Replaces __positive_embeddings_for_centroid
         self.__current_positive_point_details: Optional[Tuple[int, np.ndarray]] = (
             None  # Stores (rank, embedding)
         )
@@ -205,7 +207,8 @@ class ContextoSolver:
     def _update_positive_references(self, word: str, rank: int, embedding: np.ndarray):
         """
         Updates the solver's current positive reference point (rank and embedding)
-        and appends the embedding to the list for centroid calculation.
+        and updates the list of top-ranked positive embeddings for centroid calculation.
+        The list will store up to the 3 lowest ranked positive embeddings.
         The word is used for logging.
 
         Args:
@@ -214,10 +217,19 @@ class ContextoSolver:
             embedding: The embedding of the new positive reference.
         """
         self.__current_positive_point_details = (rank, embedding)
-        self.__positive_embeddings_for_centroid.append(embedding)
+
+        # Add new embedding with its rank
+        self.__ranked_positive_embeddings.append((rank, embedding))
+
+        # Sort by rank (lowest rank first)
+        self.__ranked_positive_embeddings.sort(key=lambda x: x[0])
+
+        # Keep only the top 3
+        self.__ranked_positive_embeddings = self.__ranked_positive_embeddings[:3]
+
         logger.info(
             f"Updated current positive reference to: Word '{word}', Rank {rank}. "
-            f"Total positive embeddings for centroid: {len(self.__positive_embeddings_for_centroid)}."
+            f"Total top-ranked positive embeddings for centroid: {len(self.__ranked_positive_embeddings)}."
         )
 
     def _process_subsequent_guess(
@@ -276,20 +288,39 @@ class ContextoSolver:
                     "Failed to make an initial random guess."
                 ) from e
 
-        # 2. Initialize variables for discovery search
+        # Initialize target vector for discovery search.
+        # It will be calculated from the top (up to 3) lowest ranked positive embeddings.
         target_vector: Optional[List[float]] = None
 
-        # 3. If more than one past guess, calculate target vector (centroid of positive embeddings)
-        if len(self.__guessed_words_set) > 1:
-            logger.info(
-                f"Calculating centroid from "
-                f"{len(self.__positive_embeddings_for_centroid)} positive embeddings."
-            )
-            target_vector = np.mean(
-                np.array(self.__positive_embeddings_for_centroid), axis=0
-            ).tolist()
-            logger.info(
-                "Using centroid of positive embeddings as target for discovery."
+        if self.__ranked_positive_embeddings:
+            embeddings_for_centroid = [
+                data[1] for data in self.__ranked_positive_embeddings
+            ]
+
+            if embeddings_for_centroid:
+                logger.info(
+                    f"Calculating centroid from {len(embeddings_for_centroid)} "
+                    f"top-ranked positive embeddings (up to 3 lowest ranks)."
+                )
+                target_vector = np.mean(
+                    np.array(embeddings_for_centroid), axis=0
+                ).tolist()
+                logger.info(
+                    "Using centroid of top-ranked positive embeddings as target for discovery."
+                )
+            else:
+                # This state (empty embeddings_for_centroid despite non-empty __ranked_positive_embeddings)
+                # would indicate an issue if __ranked_positive_embeddings contained non-embedding data by mistake.
+                logger.warning(
+                    "__ranked_positive_embeddings non-empty, but no embeddings extracted for centroid. "
+                    "Target for discovery will be absent."
+                )
+        else:
+            # This state should ideally not be reached if at least one guess has been processed,
+            # as the initial guess populates __ranked_positive_embeddings.
+            logger.warning(
+                "No ranked positive embeddings found for centroid calculation. "
+                "Target for discovery will be absent."
             )
 
         # 4. Execute discovery search
