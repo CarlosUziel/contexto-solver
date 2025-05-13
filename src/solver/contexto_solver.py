@@ -323,6 +323,26 @@ class ContextoSolver:
                 "Target for discovery will be absent."
             )
 
+        # If no target vector could be calculated and no context pairs exist,
+        # fall back to a random guess, excluding already processed words.
+        # This prevents calling discovery search without target or context.
+        if target_vector is None and not self.__context_pairs_for_discovery:
+            logger.info(
+                "No target vector and no context pairs available for discovery. "
+                "Falling back to a random guess, excluding already guessed/disallowed words."
+            )
+            try:
+                return self._fetch_random_word_from_collection(
+                    excluded_words=self.__guessed_words_set
+                )
+            except (ValueError, AttributeError) as e:
+                logger.error(
+                    f"Error making random guess after failed discovery prerequisites: {e}"
+                )
+                raise SolverUnableToGuessError(
+                    "Failed to make a random guess after discovery prerequisites were not met."
+                ) from e
+
         # 4. Execute discovery search
         candidate_word = self._execute_discovery_search(
             target_vector, self.__guessed_words_set
