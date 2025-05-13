@@ -145,7 +145,7 @@ The application's behavior can be customized through environment variables defin
 ### GloVe Dataset
 
 *   `GLOVE_DATASET`: Specifies the GloVe dataset to use for word embeddings. The choice of dataset affects the vocabulary size and the dimensionality of word vectors, which can influence solver performance and resource usage.
-    *   Default: `glove.6B.200d`
+    *   Default: `glove.6B.100d`
     *   Available Options:
         *   `glove.6B.50d`
         *   `glove.6B.100d`

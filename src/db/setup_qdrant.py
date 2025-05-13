@@ -24,9 +24,16 @@ from rich.progress import (
 
 try:
     nltk.data.find("corpora/wordnet")
+    nltk.data.find(
+        "taggers/averaged_perceptron_tagger_eng"
+    )  # Ensure specific English tagger is checked
 except LookupError:
     nltk.download("wordnet")
+    nltk.download(
+        "averaged_perceptron_tagger_eng"
+    )  # Download specific English tagger if missing
 from nltk.corpus import wordnet
+from nltk.stem import WordNetLemmatizer  # Import WordNetLemmatizer
 
 from config.logger import app_logger as logger
 from config.settings import Settings, settings
@@ -295,6 +302,8 @@ def upsert_embeddings(
     skipped_lines = 0
     global_line_index = 0
 
+    lemmatizer = WordNetLemmatizer()  # Initialize lemmatizer
+
     try:
         # 2. Open the file and set up the progress bar (without total)
         with (
@@ -333,13 +342,33 @@ def upsert_embeddings(
 
                     word_from_file = values[0].lower()  # Ensure word is lowercase
                     try:
-                        # Check if the word is a valid English word
+                        # POS tagging and lemmatization
+                        pos_tags = nltk.pos_tag([word_from_file])
+                        lemmatized_word = word_from_file  # Default to original word
+
+                        if pos_tags:  # Check if pos_tags list is not empty
+                            tag = pos_tags[0][1]  # Get the POS tag string
+                            if tag.startswith("JJ"):
+                                lemmatized_word = lemmatizer.lemmatize(
+                                    word_from_file, pos=wordnet.ADJ
+                                )
+                            elif tag.startswith("NN"):
+                                lemmatized_word = lemmatizer.lemmatize(
+                                    word_from_file, pos=wordnet.NOUN
+                                )
+                            elif tag.startswith("VB"):
+                                lemmatized_word = lemmatizer.lemmatize(
+                                    word_from_file, pos=wordnet.VERB
+                                )
+                            # If tag is none of these, lemmatized_word remains word_from_file (original lowercase)
+
+                        # Check if the lemmatized word is a valid English word
                         if not wordnet.synsets(
-                            word_from_file
-                        ):  # word_from_file is already lowercase
+                            lemmatized_word  # Check lemmatized word
+                        ):
                             logger.debug(
-                                f"Skipping non-English word {global_line_index + 1}: "
-                                f"{word_from_file}"
+                                f"Skipping non-English lemmatized word {global_line_index + 1}: "
+                                f"{lemmatized_word} (original: {word_from_file})"
                             )
                             skipped_lines += 1
                             global_line_index += 1
@@ -353,24 +382,25 @@ def upsert_embeddings(
                             normalized_vector = (np_vector / norm).tolist()
                         else:
                             logger.warning(
-                                f"Skipping word '{word_from_file}' (line {global_line_index + 1}) "
+                                f"Skipping word '{lemmatized_word}' (line {global_line_index + 1}) "
                                 f"due to zero vector (cannot normalize)."
                             )
                             skipped_lines += 1
                             global_line_index += 1
                             continue
 
-                        # UUID will be based on the lowercase word
+                        # UUID will be based on the lemmatized word
                         point_id = str(
-                            uuid.uuid5(settings.qdrant_uuid_namespace, word_from_file)
+                            uuid.uuid5(settings.qdrant_uuid_namespace, lemmatized_word)
                         )
                         points_to_upsert.append(
                             models.PointStruct(
                                 id=point_id,
                                 vector=normalized_vector,  # Use normalized vector
                                 payload={
-                                    "word": word_from_file
-                                },  # Store lowercase word
+                                    "word": lemmatized_word,  # Store lemmatized word
+                                    "original_word": word_from_file,  # Store original word for reference
+                                },
                             )
                         )
                     except ValueError:
