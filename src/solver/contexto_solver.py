@@ -57,6 +57,7 @@ class ContextoSolver:
         self.collection_info = collection_info
 
         self.__guessed_words_set: Set[str] = set()
+        self.__not_allowed_words_set: Set[str] = set()  # New set for not allowed words
         self.__context_pairs_for_discovery: List[rest_models.ContextExamplePair] = []
         self.__positive_embeddings_for_centroid: List[np.ndarray] = []
         self.__current_positive_point_details: Optional[Tuple[int, np.ndarray]] = (
@@ -74,18 +75,25 @@ class ContextoSolver:
         Returns:
             bool: True if the guess was successfully added, False otherwise
         """
+        normalized_word = word.strip().lower()
+        if not normalized_word:
+            logger.warning("Attempted to add an empty string as a guess. Skipping.")
+            return False
+
         # 1. Check if the word has already been guessed
-        if word in self.__guessed_words_set:
+        if normalized_word in self.__guessed_words_set:
             logger.info(
-                f"Word '{word}' has already been guessed. Skipping context update."
+                f"Word '{normalized_word}' has already been guessed. Skipping context update."
             )
             return False
 
         # 2. Get the embedding for the word
-        embedding = get_vector_for_word(self.client, self.collection_name, word)
+        embedding = get_vector_for_word(
+            self.client, self.collection_name, normalized_word
+        )
         if embedding is None:
             logger.warning(
-                f"Could not retrieve a valid embedding for word '{word}'. "
+                f"Could not retrieve a valid embedding for word '{normalized_word}'. "
                 "Guess not added, context not updated."
             )
             return False
@@ -95,13 +103,15 @@ class ContextoSolver:
         pair_negative_embedding: Optional[np.ndarray] = None
 
         # 4. Process the guess based on whether it's the first guess or a subsequent one
-        if not self.__guessed_words_set:
+        if (
+            not self.__guessed_words_set
+        ):  # Checks the set before adding the current normalized_word
             pair_positive_embedding, pair_negative_embedding = (
-                self._process_first_guess(word, rank, embedding)
+                self._process_first_guess(normalized_word, rank, embedding)
             )
         else:
             pair_positive_embedding, pair_negative_embedding = (
-                self._process_subsequent_guess(word, rank, embedding)
+                self._process_subsequent_guess(normalized_word, rank, embedding)
             )
 
         # 5. Add the new context pair if valid embeddings were determined
@@ -123,12 +133,52 @@ class ContextoSolver:
             )
 
         # 6. Add the guess to guessed words set
-        self.__guessed_words_set.add(word)
+        self.__guessed_words_set.add(normalized_word)
 
         logger.info(
-            f"Added guess: Word '{word}', Rank {rank}. "
+            f"Added guess: Word '{normalized_word}', Rank {rank}. "
             f"Total past guesses: {len(self.__guessed_words_set)}."
         )
+        return True
+
+    def mark_word_as_not_allowed(self, word: str) -> bool:
+        """
+        Marks a word as not allowed by the game, ensuring it won't be suggested again.
+
+        This method adds the word to a specific set of 'not allowed' words and also
+        to the general set of 'guessed' words, which is used for exclusion in
+        suggestion algorithms.
+
+        Args:
+            word: The word that is not allowed by the game.
+
+        Returns:
+            bool: True if the word's status as 'not allowed' was newly recorded.
+                  False if the word was already known to be 'not allowed' or if the input word is empty.
+        """
+        normalized_word = word.strip().lower()
+        if not normalized_word:
+            logger.warning(
+                "Attempted to mark an empty string as not allowed. Skipping."
+            )
+            return False
+
+        # Add to general exclusion list first. If it's already there, no harm.
+        # This ensures that even if it was a valid guess before, it's now also treated
+        # as something to be excluded if it wasn't already.
+        self.__guessed_words_set.add(normalized_word)
+
+        if normalized_word in self.__not_allowed_words_set:
+            logger.info(
+                f"Word '{normalized_word}' was already marked as not allowed. No change in status."
+            )
+            return False  # Already known to be specifically 'not allowed'
+
+        logger.info(
+            f"Marking word '{normalized_word}' as not allowed by the game. "
+            "It will be excluded from future suggestions."
+        )
+        self.__not_allowed_words_set.add(normalized_word)
         return True
 
     def _process_first_guess(

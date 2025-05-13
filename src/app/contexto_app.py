@@ -44,6 +44,20 @@ def initialize_session_state():
     if "benchmark_status_text_content" not in st.session_state:
         st.session_state.benchmark_status_text_content = ""
 
+    # New session state variables for "Play Real Game" mode
+    if "real_game_solver_instance" not in st.session_state:
+        st.session_state.real_game_solver_instance = None
+    if "real_game_guesses_log" not in st.session_state:
+        st.session_state.real_game_guesses_log = []  # List of (word, rank)
+    if "real_game_next_suggestion" not in st.session_state:
+        st.session_state.real_game_next_suggestion = None
+    if "real_game_error_message" not in st.session_state:
+        st.session_state.real_game_error_message = None
+    if "real_game_game_won" not in st.session_state:
+        st.session_state.real_game_game_won = False
+    if "real_game_qdrant_client" not in st.session_state:
+        st.session_state.real_game_qdrant_client = None
+
 
 # --- Game Initialization ---
 def initialize_game():
@@ -85,12 +99,14 @@ def initialize_game():
 def render_sidebar():
     """Renders the sidebar navigation and returns the selected app mode."""
     st.sidebar.title("Navigation")
-    return st.sidebar.radio("Choose a mode:", ("Play Game", "Benchmark Solver"))
+    return st.sidebar.radio(
+        "Choose a mode:", ("Play Real Game", "Play Simulated Game", "Benchmark Solver")
+    )
 
 
-# --- "Play Game" Mode Functions ---
+# --- "Play Simulated Game" Mode Functions ---
 def render_play_game_controls_column():
-    """Renders the controls in the left column for 'Play Game' mode."""
+    """Renders the controls in the left column for 'Play Simulated Game' mode."""
     if st.button("Start New Game", key="play_mode_start_new_game"):
         st.session_state.game = None
         st.session_state.solver = None
@@ -192,7 +208,7 @@ def render_play_game_controls_column():
 
 
 def render_play_game_status_column():
-    """Renders the game status in the right column for 'Play Game' mode."""
+    """Renders the game status in the right column for 'Play Simulated Game' mode."""
     if st.session_state.game_initialized_successfully and st.session_state.game:
         st.subheader("Game Status")
         if st.session_state.game.guesses:
@@ -258,7 +274,7 @@ def perform_autosolve_step_if_active():
 
 
 def handle_play_game_mode():
-    """Handles the UI and logic for the 'Play Game' mode."""
+    """Handles the UI and logic for the 'Play Simulated Game' mode."""
     st.header("Play Contexto")
 
     if st.session_state.error_message:
@@ -570,20 +586,179 @@ def handle_benchmark_mode():
         display_benchmark_results()
 
 
+# --- "Play Real Game" Mode Functions ---
+def initialize_real_game_solver():
+    """Initializes the solver for the 'Play Real Game' mode."""
+    if not st.session_state.real_game_qdrant_client:
+        try:
+            st.session_state.real_game_qdrant_client = get_qdrant_client()
+            if not st.session_state.real_game_qdrant_client:
+                st.session_state.real_game_error_message = (
+                    "Failed to connect to Qdrant. Please ensure it's running."
+                )
+                return
+        except Exception as e:
+            logger.error(f"Error initializing Qdrant client for real game: {e}")
+            st.session_state.real_game_error_message = (
+                f"Error initializing Qdrant client: {str(e)}"
+            )
+            return
+
+    try:
+        st.session_state.real_game_solver_instance = ContextoSolver(
+            client=st.session_state.real_game_qdrant_client,
+            collection_name=settings.glove_dataset,
+        )
+        st.session_state.real_game_guesses_log = []
+        st.session_state.real_game_next_suggestion = None
+        st.session_state.real_game_error_message = None
+        st.session_state.real_game_game_won = False
+        logger.info("Solver for 'Play Real Game' initialized.")
+    except Exception as e:
+        logger.error(f"Error initializing solver for real game: {e}")
+        st.session_state.real_game_error_message = (
+            f"Error initializing solver: {str(e)}"
+        )
+
+
+def render_real_game_controls():
+    """Renders controls for the 'Play Real Game' mode."""
+    st.header("Play Real Contexto.me with Solver Assistance")
+
+    if st.button("Start New Real Game Session", key="real_game_start_new"):
+        initialize_real_game_solver()
+        if st.session_state.real_game_solver_instance:
+            st.success("New session started. Solver is ready.")
+        elif st.session_state.real_game_error_message:
+            st.error(st.session_state.real_game_error_message)
+        st.rerun()
+
+    if not st.session_state.real_game_solver_instance:
+        st.info(
+            "Click 'Start New Real Game Session' to initialize the solver "
+            "and get suggestions."
+        )
+        return
+
+    if st.session_state.real_game_game_won:
+        st.balloons()
+        st.success(
+            "🎉 Congratulations! You found the word in the real Contexto.me game!"
+        )
+        return
+
+    # Display current suggestion or get a new one
+    if not st.session_state.real_game_next_suggestion:
+        try:
+            suggestion = st.session_state.real_game_solver_instance.guess_word()
+            st.session_state.real_game_next_suggestion = suggestion
+            if not suggestion:
+                st.session_state.real_game_error_message = (
+                    "Solver could not provide a new suggestion."
+                )
+        except Exception as e:
+            st.session_state.real_game_error_message = f"Error getting suggestion: {e}"
+            logger.error(f"Real Game - Error getting suggestion: {e}")
+
+    if st.session_state.real_game_next_suggestion:
+        st.subheader(
+            f"Solver Suggestion: `{st.session_state.real_game_next_suggestion}`"
+        )
+        st.markdown(
+            "Enter this word into the real [Contexto.me](https://contexto.me/) game, "
+            "then input the rank you receive below."
+        )
+
+        with st.form(key="real_game_rank_form"):
+            rank_input = st.number_input(
+                "Enter Rank from Contexto.me (1 for the secret word):",
+                min_value=1,
+                step=1,
+                key="real_game_rank_input",
+            )
+            submit_rank_button = st.form_submit_button(label="Submit Rank")
+
+            if submit_rank_button:
+                word_guessed = st.session_state.real_game_next_suggestion
+                rank_received = rank_input
+
+                if word_guessed and rank_received is not None:
+                    st.session_state.real_game_guesses_log.append(
+                        (word_guessed, rank_received)
+                    )
+                    try:
+                        st.session_state.real_game_solver_instance.add_guess(
+                            word_guessed, rank_received
+                        )
+                        if rank_received == 1:
+                            st.session_state.real_game_game_won = True
+                        st.session_state.real_game_next_suggestion = (
+                            None  # Get new suggestion
+                        )
+                        st.session_state.real_game_error_message = None
+                    except Exception as e:
+                        st.session_state.real_game_error_message = (
+                            f"Error updating solver with guess: {e}"
+                        )
+                        logger.error(
+                            f"Real Game - Error updating solver with guess: {e}"
+                        )
+                st.rerun()
+    elif not st.session_state.real_game_error_message:
+        st.info("Solver is thinking of the next suggestion...")
+
+    if st.session_state.real_game_error_message:
+        st.error(st.session_state.real_game_error_message)
+
+
+def render_real_game_log():
+    """Renders the log of guesses for the 'Play Real Game' mode."""
+    if st.session_state.real_game_guesses_log:
+        st.subheader("Guess Log (Real Game)")
+        guesses_df = pd.DataFrame(
+            st.session_state.real_game_guesses_log, columns=["Word", "Rank"]
+        )
+        guesses_df["Position"] = guesses_df["Rank"].apply(
+            lambda x: f"#{x}" if pd.notna(x) else "N/A"
+        )
+        st.dataframe(
+            guesses_df[["Word", "Position"]],
+            height=300,
+            use_container_width=True,
+            column_config={
+                "Word": st.column_config.TextColumn("Guessed Word"),
+                "Position": st.column_config.TextColumn("Rank from Contexto.me"),
+            },
+        )
+    else:
+        st.write("No guesses made yet in this session.")
+
+
+def handle_real_game_mode():
+    """Handles the UI and logic for the 'Play Real Game' mode."""
+    col1, col2 = st.columns([2, 3])  # Adjusted column ratio
+    with col1:
+        render_real_game_controls()
+    with col2:
+        render_real_game_log()
+
+
 # --- Main Application Flow ---
 def main():
     initialize_session_state()
     app_mode = render_sidebar()
 
-    if app_mode == "Play Game":
+    if app_mode == "Play Simulated Game":
         handle_play_game_mode()
     elif app_mode == "Benchmark Solver":
         handle_benchmark_mode()
+    elif app_mode == "Play Real Game":
+        handle_real_game_mode()
 
     # Clear general error message if it wasn't handled by the current mode's logic
     # and is not relevant anymore (e.g., switching modes)
-    if st.session_state.error_message and app_mode != "Play Game":
-        # Specific error handling for Play Game mode is within handle_play_game_mode
+    if st.session_state.error_message and app_mode != "Play Simulated Game":
+        # Specific error handling for Play Simulated Game mode is within handle_play_game_mode
         # This clears errors that might persist from initialization if user switches mode
         st.session_state.error_message = None
 

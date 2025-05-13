@@ -107,9 +107,9 @@ Before you begin, ensure you have the following installed:
     ```
 
 The Streamlit application provides the following options:
-*   **Normal Game**: Play a simulated Contexto game yourself.
-*   **Autosolve**: Watch the solver automatically find the secret word.
-*   **Benchmarks**: Run performance tests on the solver.
+*   **Play Real Game**: Use the solver to assist you in playing the official Contexto.me game.
+*   **Play Simulated Game**: Play a simulated Contexto game yourself or watch the solver automatically find the secret word.
+*   **Benchmark Solver**: Run performance tests on the solver.
 
 <br />
 <div align="center">
@@ -145,7 +145,7 @@ The application's behavior can be customized through environment variables defin
 ### GloVe Dataset
 
 *   `GLOVE_DATASET`: Specifies the GloVe dataset to use for word embeddings. The choice of dataset affects the vocabulary size and the dimensionality of word vectors, which can influence solver performance and resource usage.
-    *   Default: `glove.6B.100d`
+    *   Default: `glove.6B.200d`
     *   Available Options:
         *   `glove.6B.50d`
         *   `glove.6B.100d`

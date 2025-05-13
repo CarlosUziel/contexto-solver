@@ -7,7 +7,7 @@ from typing import Optional, Tuple
 
 import grpc
 import nltk
-import numpy as np  # Added numpy import
+import numpy as np
 import requests
 import typer
 from qdrant_client import QdrantClient, models
@@ -33,7 +33,7 @@ from config.settings import Settings, settings
 
 # --- Constants ---
 DATA_DIR = Path(".data")
-WORDS_FILE = DATA_DIR.parent / "words.txt"  # Path to words.txt at the project root
+WORDS_FILE = DATA_DIR.parent / "words.txt"
 GLOVE_URLS = {
     "glove.6B": ("https://huggingface.co/stanfordnlp/glove/resolve/main/glove.6B.zip"),
     "glove.twitter.27B": (
@@ -270,7 +270,6 @@ def upsert_embeddings(
     client: QdrantClient,
     collection_name: str,
     embeddings_file: Path,
-    allowed_words: Optional[set[str]] = None,
 ) -> None:
     """Loads word embeddings from a file and upserts them into a Qdrant collection.
 
@@ -283,9 +282,6 @@ def upsert_embeddings(
         collection_name (str): The name of the collection to upsert into.
         embeddings_file (Path): The Path object of the GloVe embeddings file
             (.txt format).
-        allowed_words (Optional[set[str]]): A set of lowercase words to filter against.
-                                            Only words in this set will be upserted.
-                                            If None, no filtering by this set is done.
 
     Returns:
         None.
@@ -337,16 +333,6 @@ def upsert_embeddings(
 
                     word_from_file = values[0].lower()  # Ensure word is lowercase
                     try:
-                        # Filter by allowed_words set if provided
-                        if allowed_words and word_from_file not in allowed_words:
-                            logger.debug(
-                                f"Skipping word '{word_from_file}' (line {global_line_index + 1}) "
-                                f"as it is not in the provided allowed_words set."
-                            )
-                            skipped_lines += 1
-                            global_line_index += 1
-                            continue
-
                         # Check if the word is a valid English word
                         if not wordnet.synsets(
                             word_from_file
@@ -451,26 +437,6 @@ def main(
     # 1. Log the dataset being used (obtained from typer option)
     logger.info(f"Starting setup process for dataset: {dataset_name}")
 
-    # 1a. Load allowed words from words.txt
-    allowed_words_set: Optional[set[str]] = None
-    if WORDS_FILE.exists():
-        try:
-            with WORDS_FILE.open("r", encoding="utf-8") as wf:
-                allowed_words_set = {
-                    line.strip().lower() for line in wf if line.strip()
-                }
-            logger.info(
-                f"Successfully loaded {len(allowed_words_set)} words from {WORDS_FILE}"
-            )
-        except Exception as e:
-            logger.error(
-                f"Error reading {WORDS_FILE}: {e}. Proceeding without word filtering."
-            )
-            allowed_words_set = None
-    else:
-        logger.warning(f"{WORDS_FILE} not found. Proceeding without word filtering.")
-        allowed_words_set = None
-
     # 2. Get dataset details (URL, filename, vector size)
     try:
         if (
@@ -526,7 +492,7 @@ def main(
         raise typer.Exit(code=1)
 
     # 6. Upsert embeddings
-    upsert_embeddings(client, collection_name, embeddings_file_path, allowed_words_set)
+    upsert_embeddings(client, collection_name, embeddings_file_path)
 
     # 7. Log completion
     logger.info("Qdrant setup script finished.")
