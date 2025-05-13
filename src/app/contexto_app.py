@@ -48,7 +48,7 @@ def initialize_session_state():
     if "real_game_solver_instance" not in st.session_state:
         st.session_state.real_game_solver_instance = None
     if "real_game_guesses_log" not in st.session_state:
-        st.session_state.real_game_guesses_log = []  # List of (word, rank)
+        st.session_state.real_game_guesses_log = []  # List of (word, rank_or_status)
     if "real_game_next_suggestion" not in st.session_state:
         st.session_state.real_game_next_suggestion = None
     if "real_game_error_message" not in st.session_state:
@@ -57,38 +57,47 @@ def initialize_session_state():
         st.session_state.real_game_game_won = False
     if "real_game_qdrant_client" not in st.session_state:
         st.session_state.real_game_qdrant_client = None
+    # Session state for simulated game Qdrant client
+    if "sim_qdrant_client" not in st.session_state:
+        st.session_state.sim_qdrant_client = None
 
 
 # --- Game Initialization ---
 def initialize_game():
-    """Initializes or re-initializes the game and solver."""
+    """Initializes or re-initializes the game and solver for simulated/benchmark modes."""
     try:
-        client = get_qdrant_client()
-        if not client:
-            st.session_state.error_message = (
-                "Failed to connect to Qdrant. Please ensure it's running."
-            )
+        # Initialize Qdrant client for simulated/benchmark modes if not already done
+        if not st.session_state.sim_qdrant_client:
+            st.session_state.sim_qdrant_client = get_qdrant_client()
+
+        if not st.session_state.sim_qdrant_client:
+            st.session_state.error_message = "Failed to connect to Qdrant for simulated game. Please ensure it's running."
             st.session_state.game_initialized_successfully = False
             return
 
+        # Instantiate the game
         st.session_state.game = ContextoGame(
-            collection_name=settings.glove_dataset, client=client
+            client=st.session_state.sim_qdrant_client,
+            collection_name=settings.glove_dataset,
         )
+        # The ContextoGame class initializes the game (e.g., selects a target word)
+        # in its __init__ method. Calling a separate start_new_game() is not needed
+        # and was causing an AttributeError.
+
+        # Instantiate the solver
         st.session_state.solver = ContextoSolver(
-            client=client, collection_name=settings.glove_dataset
+            client=st.session_state.sim_qdrant_client,
+            collection_name=settings.glove_dataset,
         )
+        # Reset solver's past guesses for a new game context
+        st.session_state.solver.past_guesses = []
 
         st.session_state.game_initialized_successfully = True
-        st.session_state.solver_message = None
-        st.session_state.run_full_autosolve = False
-        st.session_state.error_message = None
-        st.session_state.show_win_message = False
-        st.session_state.autosolve_start_time = None
-        if st.session_state.game:
-            logger.info(
-                f"New game started/initialized. Target: "
-                f"{st.session_state.game.get_target_word()}"
-            )
+        st.session_state.error_message = None  # Clear previous errors
+        logger.info(
+            f"Simulated game initialized. Target: {st.session_state.game.get_target_word()}"
+        )
+
     except Exception as e:
         logger.error(f"Error initializing game: {e}")
         st.session_state.error_message = f"Error initializing game: {str(e)}"
@@ -167,25 +176,31 @@ def render_play_game_controls_column():
             and not st.session_state.show_win_message
         ):
             with st.form(key="guess_form_play_mode"):
-                guess_word_input = st.text_input(
-                    "Enter your guess:",
-                    key="guess_input_play_mode",
-                    disabled=st.session_state.get("run_full_autosolve", False),
+                user_guess = st.text_input(
+                    "Enter your guess:", key="play_mode_user_guess"
                 )
-                submit_guess_button = st.form_submit_button(
-                    label="Submit Guess",
-                    disabled=st.session_state.get("run_full_autosolve", False),
-                )
-                if submit_guess_button and guess_word_input:
-                    st.session_state.error_message = None
+                submit_guess_button = st.form_submit_button(label="Submit Guess")
+
+                if submit_guess_button and user_guess:
                     try:
-                        st.session_state.game.make_guess(
-                            guess_word_input.strip().lower()
+                        rank = st.session_state.game.make_guess(user_guess)
+                        if rank is not None:
+                            st.session_state.solver.add_guess(user_guess, rank)
+                            st.session_state.solver_message = (
+                                f"🤖 You guessed '{user_guess}'. Rank: #{rank + 1}"
+                            )
+                        # else: word was already guessed or other non-error scenario from make_guess
+                        # No specific message here, game.make_guess might provide feedback via exception or return
+                    except (
+                        ValueError
+                    ) as ve:  # Word not in vocab or other game rule violation
+                        st.session_state.solver_message = f"⚠️ {str(ve)}"
+                    except Exception as e:
+                        logger.error(f"Error during manual guess: {e}")
+                        st.session_state.error_message = (
+                            f"Error processing guess: {str(e)}"
                         )
-                        st.session_state.solver_message = None
-                    except ValueError as e:
-                        st.session_state.error_message = str(e)
-                    st.rerun()
+                    st.rerun()  # Rerun to reflect the guess and message
 
         if (
             st.session_state.game.is_game_won()
@@ -666,7 +681,7 @@ def render_real_game_controls():
         )
         st.markdown(
             "Enter this word into the real [Contexto.me](https://contexto.me/) game, "
-            "then input the rank you receive below."
+            "then input the rank you receive below, or mark the suggestion as invalid."
         )
 
         with st.form(key="real_game_rank_form"):
@@ -676,7 +691,17 @@ def render_real_game_controls():
                 step=1,
                 key="real_game_rank_input",
             )
-            submit_rank_button = st.form_submit_button(label="Submit Rank")
+            col_submit, col_ignore = st.columns(2)
+            with col_submit:
+                submit_rank_button = st.form_submit_button(
+                    label="Submit Rank", use_container_width=True
+                )
+            with col_ignore:
+                ignore_suggestion_button = st.form_submit_button(
+                    label="Mark as Invalid / Ignore",
+                    type="secondary",
+                    use_container_width=True,
+                )
 
             if submit_rank_button:
                 word_guessed = st.session_state.real_game_next_suggestion
@@ -704,6 +729,33 @@ def render_real_game_controls():
                             f"Real Game - Error updating solver with guess: {e}"
                         )
                 st.rerun()
+
+            if ignore_suggestion_button:
+                word_to_ignore = st.session_state.real_game_next_suggestion
+                if word_to_ignore:
+                    st.session_state.real_game_guesses_log.append(
+                        (word_to_ignore, "Ignored")
+                    )
+                    try:
+                        st.session_state.real_game_solver_instance.mark_word_as_not_allowed(
+                            word_to_ignore
+                        )
+                        logger.info(
+                            f"Real Game: User marked '{word_to_ignore}' as invalid/ignored."
+                        )
+                        st.session_state.real_game_next_suggestion = (
+                            None  # Get new suggestion
+                        )
+                        st.session_state.real_game_error_message = None
+                    except Exception as e:
+                        st.session_state.real_game_error_message = (
+                            f"Error marking word as not allowed: {e}"
+                        )
+                        logger.error(
+                            f"Real Game - Error marking word as not allowed: {e}"
+                        )
+                st.rerun()
+
     elif not st.session_state.real_game_error_message:
         st.info("Solver is thinking of the next suggestion...")
 
@@ -719,7 +771,7 @@ def render_real_game_log():
             st.session_state.real_game_guesses_log, columns=["Word", "Rank"]
         )
         guesses_df["Position"] = guesses_df["Rank"].apply(
-            lambda x: f"#{x}" if pd.notna(x) else "N/A"
+            lambda x: f"#{x}" if pd.notna(x) and isinstance(x, (int, float)) else str(x)
         )
         st.dataframe(
             guesses_df[["Word", "Position"]],
@@ -727,7 +779,7 @@ def render_real_game_log():
             use_container_width=True,
             column_config={
                 "Word": st.column_config.TextColumn("Guessed Word"),
-                "Position": st.column_config.TextColumn("Rank from Contexto.me"),
+                "Position": st.column_config.TextColumn("Rank / Status"),
             },
         )
     else:
