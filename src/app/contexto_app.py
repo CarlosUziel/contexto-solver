@@ -1,6 +1,6 @@
-import time  # Added for timing
+import time
 
-import numpy as np  # Added for median and std calculations
+import numpy as np
 import pandas as pd
 import streamlit as st
 
@@ -78,7 +78,7 @@ def initialize_game():
         # Instantiate the game
         st.session_state.game = ContextoGame(
             client=st.session_state.sim_qdrant_client,
-            collection_name=settings.glove_dataset,
+            collection_name=settings.effective_collection_name,  # Use effective name
         )
         # The ContextoGame class initializes the game (e.g., selects a target word)
         # in its __init__ method. Calling a separate start_new_game() is not needed
@@ -87,7 +87,7 @@ def initialize_game():
         # Instantiate the solver
         st.session_state.solver = ContextoSolver(
             client=st.session_state.sim_qdrant_client,
-            collection_name=settings.glove_dataset,
+            collection_name=settings.effective_collection_name,  # Use effective name
         )
         # Reset solver's past guesses for a new game context
         st.session_state.solver.past_guesses = []
@@ -604,36 +604,28 @@ def handle_benchmark_mode():
 # --- "Play Real Game" Mode Functions ---
 def initialize_real_game_solver():
     """Initializes the solver for the 'Play Real Game' mode."""
-    if not st.session_state.real_game_qdrant_client:
-        try:
-            st.session_state.real_game_qdrant_client = get_qdrant_client()
-            if not st.session_state.real_game_qdrant_client:
-                st.session_state.real_game_error_message = (
-                    "Failed to connect to Qdrant. Please ensure it's running."
-                )
-                return
-        except Exception as e:
-            logger.error(f"Error initializing Qdrant client for real game: {e}")
-            st.session_state.real_game_error_message = (
-                f"Error initializing Qdrant client: {str(e)}"
-            )
-            return
+    if not st.session_state.get("real_game_qdrant_client"):
+        st.session_state.real_game_qdrant_client = get_qdrant_client()
 
-    try:
-        st.session_state.real_game_solver_instance = ContextoSolver(
-            client=st.session_state.real_game_qdrant_client,
-            collection_name=settings.glove_dataset,
-        )
-        st.session_state.real_game_guesses_log = []
-        st.session_state.real_game_next_suggestion = None
-        st.session_state.real_game_error_message = None
-        st.session_state.real_game_game_won = False
-        logger.info("Solver for 'Play Real Game' initialized.")
-    except Exception as e:
-        logger.error(f"Error initializing solver for real game: {e}")
+    if st.session_state.real_game_qdrant_client:
+        try:
+            st.session_state.real_game_solver_instance = ContextoSolver(
+                client=st.session_state.real_game_qdrant_client,
+                collection_name=settings.effective_collection_name,  # Use effective name
+            )
+            st.session_state.real_game_error_message = None
+            logger.info("Real game solver initialized.")
+        except Exception as e:
+            logger.error(f"Error initializing real game solver: {e}")
+            st.session_state.real_game_error_message = (
+                f"Could not initialize solver: {e}"
+            )
+            st.session_state.real_game_solver_instance = None
+    else:
         st.session_state.real_game_error_message = (
-            f"Error initializing solver: {str(e)}"
+            "Qdrant connection not available for real game solver."
         )
+        st.session_state.real_game_solver_instance = None
 
 
 def render_real_game_controls():

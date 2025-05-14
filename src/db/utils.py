@@ -45,11 +45,9 @@ def get_collection_info(
 ) -> Optional[models.CollectionInfo]:
     """Retrieves information about a specific Qdrant collection.
 
-    Uses Streamlit's cache_data for caching the result.
-
     Args:
-        _client (QdrantClient): An initialized QdrantClient instance.
-        collection_name (str): The name of the collection to query.
+        _client: An initialized QdrantClient instance.
+        collection_name: The name of the collection to query.
 
     Returns:
         Optional[models.CollectionInfo]: Information about the collection, or None if
@@ -71,14 +69,15 @@ def get_random_point(
     total_points: int,
     excluded_words: Optional[Set[str]] = None,
 ) -> Optional[Record]:
-    """Fetches a single random point (word and vector) from the collection using random sampling.
-    Can optionally exclude a set of words.
+    """Fetches a single random point (word and vector) from the collection.
+
+    Uses random sampling. Can optionally exclude a set of words.
 
     Args:
-        _client (QdrantClient): An initialized QdrantClient instance.
-        collection_name (str): The name of the collection.
-        total_points (int): The total number of points in the collection (used for logging).
-        excluded_words (Optional[Set[str]], optional): A set of words to exclude. Defaults to None.
+        _client: An initialized QdrantClient instance.
+        collection_name: The name of the collection.
+        total_points: The total number of points in the collection (used for logging).
+        excluded_words: A set of words to exclude. Defaults to None.
 
     Returns:
         Optional[Record]: A Qdrant Record object containing the random point's data,
@@ -104,8 +103,8 @@ def get_random_point(
         query_responses = _client.query_points(
             collection_name=collection_name,
             query=models.SampleQuery(sample=models.Sample.RANDOM),
-            query_filter=query_filter,  # Apply the filter here
-            limit=1,  # We need only one random point
+            query_filter=query_filter,
+            limit=1,
             with_payload=True,
             with_vectors=True,
         )
@@ -142,18 +141,82 @@ def get_random_point(
         return None
 
 
-def create_qdrant_exclusion_filter(
-    excluded_words: Optional[Set[str]],
-) -> Optional[rest_models.Filter]:
-    """
-    Creates a Qdrant filter object to exclude a given set of words.
+def get_multiple_random_points(
+    _client: QdrantClient,
+    collection_name: str,
+    excluded_words: Optional[Set[str]] = None,
+    count: int = 1,
+) -> List[Record]:
+    """Fetches multiple random points from the collection using random sampling.
+
+    Can optionally exclude a set of words.
 
     Args:
-        excluded_words (Optional[Set[str]]): A set of words to exclude.
-                                             If None or empty, returns None.
+        _client: An initialized QdrantClient instance.
+        collection_name: The name of the collection.
+        excluded_words: A set of words to exclude. Defaults to None.
+        count: The number of random points to fetch.
 
     Returns:
-        Optional[rest_models.Filter]: A Qdrant Filter object or None.
+        List[Record]: A list of Qdrant Record objects. Empty if an error occurs or no points are found.
+    """
+    query_filter: Optional[rest_models.Filter] = None
+    if excluded_words and len(excluded_words) > 0:
+        logger.info(
+            f"Applying exclusion filter for {len(excluded_words)} words for {count} random points."
+        )
+        query_filter = rest_models.Filter(
+            must_not=[
+                rest_models.FieldCondition(
+                    key="word", match=rest_models.MatchAny(any=list(excluded_words))
+                )
+            ]
+        )
+
+    logger.info(
+        f"Attempting to select {count} random points from '{collection_name}' using random "
+        f"sampling, filter {'applied' if query_filter else 'not applied'}."
+    )
+    try:
+        query_responses = _client.query_points(
+            collection_name=collection_name,
+            query=models.SampleQuery(sample=models.Sample.RANDOM),
+            query_filter=query_filter,
+            limit=count,
+            with_payload=True,
+            with_vectors=False,  # We only need payload for word frequency
+        )
+
+        if query_responses and query_responses.points:
+            logger.info(
+                f"Successfully fetched {len(query_responses.points)} random points."
+            )
+            return query_responses.points
+        else:
+            logger.warning(
+                f"No random points returned for collection '{collection_name}'."
+            )
+            return []
+
+    except Exception as e:
+        logger.error(
+            f"Error selecting {count} random points using sampling from '{collection_name}': {e}",
+            exc_info=True,
+        )
+        return []
+
+
+def create_qdrant_exclusion_filter(
+    excluded_words: Set[str],
+) -> Optional[rest_models.Filter]:
+    """Creates a Qdrant filter to exclude a set of words.
+
+    Args:
+        excluded_words: A set of words to be excluded from search results.
+
+    Returns:
+        Optional[rest_models.Filter]: A Qdrant Filter object if excluded_words is not empty,
+                                 otherwise None.
     """
     if not excluded_words:
         return None
@@ -178,10 +241,10 @@ def get_all_similarities(
     Performs a kNN search where k is the total number of points to get a ranked list.
 
     Args:
-        _client (QdrantClient): An initialized QdrantClient instance.
-        collection_name (str): The name of the collection.
-        target_vector (np.ndarray): The vector of the target word.
-        total_points (int): The total number of points in the collection.
+        _client: An initialized QdrantClient instance.
+        collection_name: The name of the collection.
+        target_vector: The vector of the target word.
+        total_points: The total number of points in the collection.
 
     Returns:
         Optional[Dict[str, Tuple[int, np.ndarray]]]:
@@ -204,16 +267,18 @@ def get_all_similarities(
 
         ranked_similarities_with_vectors = {}
         for rank, hit in enumerate(search_result):
-            # Assumes payload, payload["word"], and hit.vector exist
-            actual_word = hit.payload["word"]
-            ranked_similarities_with_vectors[actual_word.lower()] = (
-                rank,  # Store 0-indexed rank
-                np.array(hit.vector, dtype=np.float32),
-            )
+            if hit.payload and "word" in hit.payload and hit.vector:
+                actual_word = hit.payload["word"]
+                ranked_similarities_with_vectors[actual_word.lower()] = (
+                    rank,
+                    np.array(hit.vector, dtype=np.float32),
+                )
+            else:
+                logger.debug(
+                    f"Skipping hit in get_all_similarities due to missing payload, word, or vector. ID: {hit.id}"
+                )
 
         if not ranked_similarities_with_vectors:
-            # This case might still be possible if search_result is empty for some reason,
-            # even if total_points > 0. For example, if the target_vector is malformed.
             logger.warning(
                 f"Similarity search returned no results or no valid words in payload "
                 f"for collection '{collection_name}'."
@@ -232,21 +297,21 @@ def get_all_similarities(
 
 
 def get_vector_for_word(
-    client: QdrantClient, collection_name: str, word: str
+    _client: QdrantClient, collection_name: str, word: str
 ) -> Optional[np.ndarray]:
-    """
-    Retrieves the vector for a given word from the Qdrant collection.
+    """Retrieves the vector embedding for a specific word from the collection.
 
     Args:
-        client (QdrantClient): An initialized QdrantClient instance.
-        collection_name (str): The name of the Qdrant collection.
-        word (str): The word (lowercase) to search for.
+        _client: An initialized QdrantClient instance.
+        collection_name: The name of the collection.
+        word: The word for which to retrieve the vector.
 
     Returns:
-        Optional[np.ndarray]: The vector as a NumPy array if found, else None.
+        Optional[np.ndarray]: The vector embedding as a NumPy array, or None if
+                              the word is not found or an error occurs.
     """
     try:
-        points, _ = client.scroll(
+        points, _ = _client.scroll(
             collection_name=collection_name,
             scroll_filter=rest_models.Filter(
                 must=[
@@ -259,12 +324,26 @@ def get_vector_for_word(
             with_payload=False,
             with_vectors=True,
         )
-        if points and points[0] and points[0].vector:
-            return np.array(points[0].vector, dtype=np.float32)
-        logger.warning(
-            f"get_vector_for_word: Word '{word}' not found or has no vector in "
-            f"collection '{collection_name}'."
-        )
+        if not points:
+            logger.warning(
+                f"No point found for word '{word}' in collection '{collection_name}'."
+            )
+            return None
+
+        if len(points) > 1:
+            logger.warning(
+                f"Multiple points found for word '{word}' in collection '{collection_name}'. "
+                f"Returning vector for the first point (ID: {points[0].id})."
+            )
+
+        if points[0].vector is None:
+            logger.error(
+                f"Point for word '{word}' (ID: {points[0].id}) in '{collection_name}' has no vector."
+            )
+            return None
+
+        logger.debug(f"Successfully retrieved vector for word '{word}'.")
+        return np.array(points[0].vector, dtype=np.float32)
     except Exception as e:
         logger.error(
             f"get_vector_for_word: Error fetching vector for '{word}': {e}",
@@ -279,7 +358,7 @@ def find_closest_word_to_point(
     point_vector: List[float],
     exclude_words: Set[str],
 ) -> Optional[str]:
-    """Finds the closest word embedding in the Qdrant collection to a given point.
+    """Finds the closest word in the Qdrant collection to a given point.
 
     This function searches the specified Qdrant collection for the word whose
     vector representation is most similar (closest) to the provided `point_vector`,
@@ -306,12 +385,14 @@ def find_closest_word_to_point(
             query_vector=point_vector,
             query_filter=q_filter,
             limit=32,
+            with_payload=True,
+            with_vectors=False,
         )
 
-        for hit in hits:  # Iterate through hits for safety
+        for hit in hits:
             if hit.payload and "word" in hit.payload:
-                found_word = hit.payload["word"].lower()  # Ensure lowercase
-                if found_word not in exclude_words:  # Double-check exclusion
+                found_word = hit.payload["word"].lower()
+                if found_word not in exclude_words:
                     logger.debug(
                         f"find_closest_word_to_point: Closest word: '{found_word}' "
                         f"(Score: {hit.score})"

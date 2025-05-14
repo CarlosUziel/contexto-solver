@@ -20,4 +20,5 @@ dependencies = [
     "watchdog>=6.0.0",
     "pre-commit>=4.2.0",
     "loguru>=0.7.3",
+    "wordfreq>=3.1.1",
 ]

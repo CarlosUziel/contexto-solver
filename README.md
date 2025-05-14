@@ -162,6 +162,14 @@ The application's behavior can be customized through environment variables defin
 
 *   `QDRANT_HNSW_EF`: The 'ef' (size of the dynamic list for HNSW) parameter for Qdrant search. This affects search speed and accuracy. Higher values can lead to more accurate searches but may increase latency.
     *   Default: `64`
+*   `TOP_N_POSITIVE_EMBEDDINGS`: The number of top-ranked positive embeddings to consider for calculating the centroid vector. This centroid is used as a target in discovery searches.
+    *   Default: `3`
+*   `RANDOM_SAMPLE_SIZE_FOR_FREQ_CHECK`: The number of random words to sample when fetching an initial word or when discovery search fails. The solver selects the most frequent word from this sample.
+    *   Default: `256`
+*   `DISCOVERY_SEARCH_LIMIT`: The maximum number of results to retrieve from a Qdrant discovery search. The solver then selects the most frequent word from these results.
+    *   Default: `4`
+*   `USE_ONLY_NOUNS`: If set to `true`, the application will use a Qdrant collection containing only nouns. The collection name will be the `GLOVE_DATASET` name suffixed with `_nouns` (e.g., `glove.6B.100d_nouns`). This can be useful for a more targeted search if the secret word is known or suspected to be a noun.
+    *   Default: `false`
 
 <p align="right">(<a href="#top">back to top</a>)</p>
 
@@ -180,42 +188,32 @@ The application's behavior can be customized through environment variables defin
 
 ## 💡 Algorithm Explanation
 
-The Contexto solver employs a multi-stage strategy to pinpoint the secret word. This process heavily relies on Qdrant's vector search capabilities, especially its [*Discovery API*](https://qdrant.tech/documentation/concepts/explore/#discovery-api), to navigate the word-embedding space efficiently. Let $V$ represent the vector embedding of a word.
+The Contexto solver employs a multi-stage strategy to pinpoint the secret word. This process heavily relies on Qdrant's vector search capabilities, especially its [*Discovery API*](https://qdrant.tech/documentation/concepts/explore/#discovery-api), to navigate the word-embedding space efficiently. Word frequency, obtained using the `wordfreq` library, plays a crucial role in prioritizing candidate words at various stages. Let $V$ represent the vector embedding of a word.
 
 Here's a breakdown of the solver's process:
 
 1.  **Initial Guess: $G_0$**
-    *   If no guesses have been made (i.e., the set of past guesses $\mathcal{G}_{past}$ is empty), the solver selects a word $w_0$ uniformly at random from the entire collection. Its embedding is $V_0$. This serves as the initial anchor point.
+    *   If no guesses have been made (i.e., the set of past guesses $\mathcal{G}_{past}$ is empty), the solver fetches a batch of `RANDOM_SAMPLE_SIZE_FOR_FREQ_CHECK` random words from the collection. It then selects the word with the highest frequency in the English language (using the `wordfreq` library) as the initial guess $w_0$. Its embedding is $V_0$. This serves as the initial anchor point.
+    *   If this process fails to yield a word (e.g., all sampled words have zero frequency or are invalid), it attempts to fetch a single random point as a fallback.
 
 2.  **Iterative Refinement via Discovery Search (for guess $G_i, i \ge 1$)**
     *   Once at least one guess $(w_{prev}, r_{prev}, V_{prev})$ exists, the solver primarily uses Qdrant's Discovery API. This requires constructing:
-        *   **Context Pairs ($\mathcal{C}$)**: A list of positive and negative example embeddings to guide the search.
-        *   **Target Vector ($V_{target}$)**: An optional specific point in the embedding space to steer the search towards.
-        *   **Set of Past Guesses ($\mathcal{G}_{past}$)**: To exclude already tried words.
+        *   **Context Pairs**: For each past guess $(w_j, r_j, V_j)$, a context pair is formed. If $w_j$ improved upon the previous best guess (i.e., $r_j < r_{best\_prev}$), then $V_j$ becomes a positive example and $V_{best\_prev}$ becomes a negative example. Otherwise, $V_{best\_prev}$ remains positive and $V_j$ becomes negative.
+        *   **Target Vector (Centroid)**: The solver maintains a list of the top `TOP_N_POSITIVE_EMBEDDINGS` best (lowest rank) positive embeddings encountered so far. A centroid (average vector) is calculated from these embeddings. This centroid serves as the `target` for the discovery search, guiding it towards promising regions of the embedding space.
+    *   The Discovery API is then queried with these context pairs and the target centroid. The search is limited to `DISCOVERY_SEARCH_LIMIT` results.
+    *   From the returned results, the solver selects the word with the highest frequency in English. This word becomes the next guess $w_i$. This frequency check ensures that more common and relevant words are prioritized among the semantically similar candidates.
 
-    *   **Context Pair Formation**:
-        *   **For the first guess ($G_0$ with embedding $V_0$)**: A single context pair is formed. The positive example is $V_0$, and the negative example is $-V_0$ (the negation of the first guess's embedding). This initial pair helps establish a basic direction.
-        *   **For subsequent guesses ($G_i$ with embedding $V_i$, where $i \ge 1$)**: Let $(w_{best}, r_{best}, V_{best})$ be the current best guess (lowest rank) from $\mathcal{G}_{past}$.
-            *   If $w_i$ is better than $w_{best}$ (i.e., $r_i < r_{best}$), the new context pair is (positive: $V_i$, negative: $V_{best}$). $w_i$ becomes the new $w_{best}$.
-            *   If $w_i$ is not better than $w_{best}$ (i.e., $r_i \ge r_{best}$), the new context pair is (positive: $V_{best}$, negative: $V_i$).
-        *   Each new guess $G_i$ results in one additional context pair being added to $\mathcal{C}$.
-
-    *   **Target Vector ($V_{target}$) Determination**:
-        *   The solver maintains a list of embeddings, $\mathcal{V}_{positive\_centroid}$, which includes the embedding of the first guess and any subsequent guess that became the new best guess.
-            *   **For the second guess ($G_1$, when $|\mathcal{G}_{past}|=1$)**: The `target` vector is `None`. The Discovery API search relies solely on the initial context pair.
-            *   **For guesses $G_i$ where $i \ge 2$ (when $|\mathcal{G}_{past}| > 1$)**: The `target` vector $V_{target}$ is the centroid (mean) of all embeddings in $\mathcal{V}_{positive\_centroid}$.
-            *   In all discovery searches (i.e., for any guess $G_i$ where $i \ge 1$), the `limit` for search results is 1. This focuses the search on the single best candidate based on the current context and target vector (if present).
-
-    *   **Executing Discovery Search**:
-        *   The solver calls Qdrant's `discover` method with the accumulated $\mathcal{C}$, the determined $V_{target}$ (if any), a filter to exclude words in $\mathcal{G}_{past}$, and other search parameters like `hnsw_ef`.
+3.  **Fallback Strategy**
+    *   If the Discovery Search (Step 2) does not return any usable results (e.g., all candidates are already guessed or have zero frequency), the solver falls back to the random word selection strategy described in Step 1 (fetching `RANDOM_SAMPLE_SIZE_FOR_FREQ_CHECK` words and selecting the most frequent one).
 
 > [!NOTE]
-> **More about Qdrant Discovery API:**
-> 
+> **More about Qdrant Discovery API and Word Frequency:**
+>
 > The Discovery API is a powerful feature for exploring the vector space. It allows searching for points (word embeddings in this case) that are "semantically similar" to a set of positive example vectors and "dissimilar" to a set of negative example vectors. This similarity/dissimilarity is typically determined by vector distances (e.g., cosine similarity or dot product) in the embedding space.
 >   -   When a `target` vector is provided, the search is not only guided by the positive/negative context pairs but is also biased towards this specific `target` point. This dual influence helps to steer the exploration towards a region of interest that the solver has identified as promising (e.g., the centroid of previously successful guesses), effectively refining the search within a known good area. The API attempts to find points that are close to the positive examples, far from the negative examples, and also close to the target vector.
 >   -   If no `target` is provided (i.e., `target` is `None`), the API focuses solely on optimizing the search based on the given positive and negative context pairs. It seeks items that best satisfy these relative relationships—close to positives, far from negatives—without a specific directional anchor. This mode is particularly useful in the early stages of the solving process, such as for the second guess, to encourage broader exploration and discover new potential areas of the embedding space.
 >   -   The effectiveness of the Discovery API can be influenced by the quality and quantity of the context pairs provided. More pairs can offer finer-grained control over the search direction, helping Qdrant better understand the desired semantic region.
+>   -   **Word Frequency Prioritization**: After the Discovery API returns a list of candidate words, the solver uses the `wordfreq` library to determine the frequency of each candidate in the English language. The candidate with the highest frequency is chosen as the next guess. This step is crucial because vector similarity alone might suggest obscure or highly specific words. By prioritizing more common words, the solver aims to make guesses that are more likely to be the target word in a general-knowledge game like Contexto. This heuristic significantly improves the solver's practical performance and relevance of suggestions.
 >
 > <p align="center">
 >  <img src="docs/qdrant_discovery_api.png" alt="Qdrant Discovery API"><br>
